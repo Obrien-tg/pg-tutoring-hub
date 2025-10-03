@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}Messages - PG Tutoring{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h3>Messages</h3>
+    <div class="card mt-3">
+        <div class="card-body">
+            {% if rooms %}
+                <ul class="list-group">
+                    {% for r in rooms %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <a href="{% url 'chat:room' r.id %}">{{ r.name }}</a>
+                            <small class="text-muted">{{ r.created_at|timesince }} ago</small>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <div class="text-center py-4 text-muted">No conversations yet.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}Learning Materials - PG Tutoring{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h3>Learning Materials</h3>
+    <div class="row mt-3">
+        {% for material in materials %}
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ material.title }}</h5>
+                        <p class="card-text">{{ material.subject.name }} • {{ material.difficulty_level }}</p>
+                        <a href="{% url 'hub:material_detail' material.pk %}" class="btn btn-primary btn-sm">Open</a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12 text-center text-muted">No materials available.</div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

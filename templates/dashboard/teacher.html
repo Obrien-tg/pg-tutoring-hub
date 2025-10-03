@@ -1,0 +1,233 @@
+{% extends 'base.html' %}
+
+{% block title %}Teacher Dashboard - PG Tutoring{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar">
+            <div class="pt-3">
+                <h5 class="text-center text-white">
+                    <i class="fas fa-chalkboard-teacher"></i> Teacher Panel
+                </h5>
+                <hr class="text-white">
+                
+                <nav class="nav flex-column">
+                    <a class="nav-link active" href="#overview">
+                        <i class="fas fa-tachometer-alt"></i> Overview
+                    </a>
+                    <a class="nav-link" href="/hub/">
+                        <i class="fas fa-book-open"></i> Materials
+                    </a>
+                    <a class="nav-link" href="#students">
+                        <i class="fas fa-users"></i> Students
+                    </a>
+                    <a class="nav-link" href="/chat/">
+                        <i class="fas fa-comments"></i> Messages
+                    </a>
+                    <a class="nav-link" href="#assignments">
+                        <i class="fas fa-tasks"></i> Assignments
+                    </a>
+                    <a class="nav-link" href="#analytics">
+                        <i class="fas fa-chart-bar"></i> Analytics
+                    </a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10 ms-sm-auto px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">
+                    <i class="fas fa-sun text-warning"></i> Good {{ time_of_day }}, Patience!
+                </h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group me-2">
+                        <button type="button" class="btn btn-sm btn-outline-secondary">
+                            <i class="fas fa-download"></i> Export
+                        </button>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-primary">
+                        <i class="fas fa-plus"></i> New Material
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="row mb-4">
+                <div class="col-md-3 mb-3">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title">{{ total_students }}</h4>
+                                    <p class="card-text">Total Students</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-users fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <div class="card bg-success text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title">{{ total_materials }}</h4>
+                                    <p class="card-text">Learning Materials</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-book-open fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <div class="card bg-info text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title">{{ total_assignments }}</h4>
+                                    <p class="card-text">Active Assignments</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-tasks fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <div class="card bg-warning text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title">85%</h4>
+                                    <p class="card-text">Completion Rate</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-chart-line fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-clock"></i> Recent Materials</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if recent_materials %}
+                                <div class="list-group list-group-flush">
+                                    {% for material in recent_materials %}
+                                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="mb-1">{{ material.title }}</h6>
+                                                <p class="mb-1 text-muted">{{ material.subject.name }} - {{ material.get_material_type_display }}</p>
+                                                <small class="text-muted">{{ material.created_at|timesince }} ago</small>
+                                            </div>
+                                            <span class="badge bg-primary rounded-pill">{{ material.difficulty_level }}</span>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="text-center py-4 text-muted">
+                                    <i class="fas fa-book fa-3x mb-3"></i>
+                                    <p>No materials uploaded yet. <a href="/hub/" class="text-primary">Create your first material</a></p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-comments"></i> Recent Messages</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if recent_messages %}
+                                <div class="list-group list-group-flush">
+                                    {% for message in recent_messages %}
+                                        <div class="list-group-item">
+                                            <div class="d-flex w-100 justify-content-between">
+                                                <h6 class="mb-1">{{ message.room.name }}</h6>
+                                                <small>{{ message.timestamp|timesince }} ago</small>
+                                            </div>
+                                            <p class="mb-1">{{ message.content|truncatewords:10 }}</p>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="text-center py-4 text-muted">
+                                    <i class="fas fa-comments fa-3x mb-3"></i>
+                                    <p>No recent messages</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-rocket"></i> Quick Actions</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <div class="d-grid">
+                                        <button class="btn btn-outline-primary">
+                                            <i class="fas fa-plus"></i><br>
+                                            <span>New Material</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="d-grid">
+                                        <button class="btn btn-outline-success">
+                                            <i class="fas fa-tasks"></i><br>
+                                            <span>Create Assignment</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="d-grid">
+                                        <button class="btn btn-outline-info">
+                                            <i class="fas fa-user-plus"></i><br>
+                                            <span>Add Student</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="d-grid">
+                                        <button class="btn btn-outline-warning">
+                                            <i class="fas fa-chart-bar"></i><br>
+                                            <span>View Analytics</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

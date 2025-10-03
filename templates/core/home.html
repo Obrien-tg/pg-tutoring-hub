@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PG Tutoring - Bringing Education to Your Phone</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 100px 0;
+        }
+        .feature-card {
+            transition: transform 0.3s;
+            border: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+        .teacher-img {
+            border-radius: 50%;
+            width: 200px;
+            height: 200px;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#"><i class="fas fa-graduation-cap"></i> PG Tutoring</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="#home">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#services">Services</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+                    <li class="nav-item"><a class="nav-link btn btn-primary text-white ms-2" href="/admin/">Student Portal</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero-section">
+        <div class="container text-center">
+            <h1 class="display-4 fw-bold mb-4">Bringing Education to Your Phone</h1>
+            <p class="lead mb-5">Expert primary school tutoring by Patience Gwanyanya. Personalized lessons, interactive materials, and community-focused education for the modern age.</p>
+            
+            {% if user.is_authenticated %}
+                <div class="row">
+                    <div class="col-md-8 mx-auto">
+                        <div class="alert alert-success mb-4">
+                            <h5><i class="fas fa-user-check"></i> Welcome back, {{ user.first_name|default:user.username }}!</h5>
+                            <p class="mb-3">Ready to continue your learning journey?</p>
+                        </div>
+                        <a href="{% url 'users:dashboard' %}" class="btn btn-light btn-lg me-3">
+                            <i class="fas fa-tachometer-alt"></i> Go to Dashboard
+                        </a>
+                        <a href="#about" class="btn btn-outline-light btn-lg">
+                            <i class="fas fa-info-circle"></i> Learn More
+                        </a>
+                    </div>
+                </div>
+            {% else %}
+                <div class="row">
+                    <div class="col-md-10 mx-auto">
+                        <div class="card bg-white bg-opacity-90 mb-4">
+                            <div class="card-body p-4">
+                                <h4 class="text-dark mb-3">Join PG Tutoring Today!</h4>
+                                <p class="text-dark mb-4">Choose your role to get started with personalized learning experience</p>
+                                
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <div class="card border-primary h-100">
+                                            <div class="card-body text-center">
+                                                <i class="fas fa-graduation-cap fa-3x text-primary mb-3"></i>
+                                                <h6 class="text-primary">I'm a Student</h6>
+                                                <p class="small text-muted">Access learning materials and assignments</p>
+                                                <a href="{% url 'users:register' %}?role=student" class="btn btn-primary btn-sm">Register as Student</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-4">
+                                        <div class="card border-success h-100">
+                                            <div class="card-body text-center">
+                                                <i class="fas fa-users fa-3x text-success mb-3"></i>
+                                                <h6 class="text-success">I'm a Parent</h6>
+                                                <p class="small text-muted">Monitor your child's progress</p>
+                                                <a href="{% url 'users:register' %}?role=parent" class="btn btn-success btn-sm">Register as Parent</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-4">
+                                        <div class="card border-info h-100">
+                                            <div class="card-body text-center">
+                                                <i class="fas fa-chalkboard-teacher fa-3x text-info mb-3"></i>
+                                                <h6 class="text-info">I'm a Teacher</h6>
+                                                <p class="small text-muted">Manage students and materials</p>
+                                                <a href="{% url 'users:register' %}?role=teacher" class="btn btn-info btn-sm">Register as Teacher</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <hr class="my-4">
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-2">
+                                        <a href="{% url 'users:login' %}" class="btn btn-outline-primary btn-lg w-100">
+                                            <i class="fas fa-sign-in-alt"></i> Login to Existing Account
+                                        </a>
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <a href="#about" class="btn btn-outline-secondary btn-lg w-100">
+                                            <i class="fas fa-info-circle"></i> Learn More First
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-5">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <img src="https://via.placeholder.com/400x400/6c757d/ffffff?text=Patience+Gwanyanya" alt="Patience Gwanyanya" class="teacher-img mx-auto d-block mb-4">
+                </div>
+                <div class="col-lg-6">
+                    <h2 class="mb-4">Meet Your Teacher: Patience Gwanyanya</h2>
+                    <p class="lead">With years of dedicated experience in primary education, Patience brings passion, expertise, and innovation to every lesson.</p>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success me-2"></i> Certified Primary School Educator</li>
+                        <li><i class="fas fa-check text-success me-2"></i> Specialized in Modern Teaching Methods</li>
+                        <li><i class="fas fa-check text-success me-2"></i> Community-Focused Approach</li>
+                        <li><i class="fas fa-check text-success me-2"></i> Technology-Enhanced Learning</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="py-5 bg-light">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="display-5 fw-bold">Our Services</h2>
+                <p class="lead">Comprehensive educational support for primary school students</p>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card feature-card h-100 text-center p-4">
+                        <div class="card-body">
+                            <i class="fas fa-chalkboard-teacher fa-3x text-primary mb-3"></i>
+                            <h5 class="card-title">Personal Tutoring</h5>
+                            <p class="card-text">One-on-one sessions tailored to your child's learning style and pace.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card feature-card h-100 text-center p-4">
+                        <div class="card-body">
+                            <i class="fas fa-comments fa-3x text-success mb-3"></i>
+                            <h5 class="card-title">Real-time Communication</h5>
+                            <p class="card-text">Direct messaging system for students, parents, and teacher interaction.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card feature-card h-100 text-center p-4">
+                        <div class="card-body">
+                            <i class="fas fa-book-open fa-3x text-info mb-3"></i>
+                            <h5 class="card-title">Learning Materials Hub</h5>
+                            <p class="card-text">Access to worksheets, tests, and educational resources anytime, anywhere.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-5">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="display-5 fw-bold">Why Choose PG Tutoring?</h2>
+            </div>
+            <div class="row g-4">
+                <div class="col-lg-3 col-md-6">
+                    <div class="text-center">
+                        <i class="fas fa-mobile-alt fa-3x text-primary mb-3"></i>
+                        <h5>Mobile-First</h5>
+                        <p>Education accessible on any device, anywhere, anytime.</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="text-center">
+                        <i class="fas fa-heart fa-3x text-danger mb-3"></i>
+                        <h5>Community Focused</h5>
+                        <p>Supporting local families with personalized attention.</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="text-center">
+                        <i class="fas fa-chart-line fa-3x text-success mb-3"></i>
+                        <h5>Progress Tracking</h5>
+                        <p>Monitor your child's educational journey and achievements.</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="text-center">
+                        <i class="fas fa-shield-alt fa-3x text-warning mb-3"></i>
+                        <h5>Safe & Secure</h5>
+                        <p>Protected environment for learning and communication.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-5 bg-dark text-white">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="display-5 fw-bold">Get Started Today</h2>
+                <p class="lead">Ready to transform your child's education? Contact us now!</p>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="card bg-light">
+                        <div class="card-body p-5">
+                            <form>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="name" class="form-label text-dark">Parent/Guardian Name</label>
+                                        <input type="text" class="form-control" id="name" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="email" class="form-label text-dark">Email</label>
+                                        <input type="email" class="form-control" id="email" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="phone" class="form-label text-dark">Phone Number</label>
+                                        <input type="tel" class="form-control" id="phone">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="student-name" class="form-label text-dark">Student Name</label>
+                                        <input type="text" class="form-control" id="student-name" required>
+                                    </div>
+                                    <div class="col-12">
+                                        <label for="message" class="form-label text-dark">Message</label>
+                                        <textarea class="form-control" id="message" rows="4" placeholder="Tell us about your child's learning needs..."></textarea>
+                                    </div>
+                                    <div class="col-12 text-center">
+                                        <button type="submit" class="btn btn-primary btn-lg">
+                                            <i class="fas fa-paper-plane"></i> Send Message
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-secondary text-white py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="fas fa-graduation-cap"></i> PG Tutoring</h5>
+                    <p>Bringing quality education to the digital age.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p>&copy; 2025 PG Tutoring. All rights reserved.</p>
+                    <p>Built with ❤️ for Patience Gwanyanya</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

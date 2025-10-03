@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Create Assignment - PG Tutoring{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h3>Create Assignment</h3>
+    <div class="card mt-3">
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                {{ form.non_field_errors }}
+
+                <div class="mb-3">{{ form.title|add_class:'form-control' }}</div>
+                <div class="mb-3">{{ form.description|add_class:'form-control' }}</div>
+                <div class="mb-3">{{ form.material|add_class:'form-select' }}</div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">{{ form.due_date|add_class:'form-control' }}</div>
+                    <div class="col-md-6 mb-3">{{ form.assigned_to|add_class:'form-select' }}</div>
+                </div>
+
+                <button class="btn btn-gradient">Create Assignment</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
