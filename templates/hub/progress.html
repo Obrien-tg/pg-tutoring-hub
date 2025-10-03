@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block title %}My Progress - PG Tutoring{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h3>My Progress</h3>
+    <div class="card mt-3">
+        <div class="card-body">
+            {% if progress_list %}
+                <ul class="list-group">
+                    {% for p in progress_list %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6>{{ p.material.title }}</h6>
+                                <small class="text-muted">Started: {{ p.started_at }}</small>
+                            </div>
+                            <div>
+                                {% if p.is_completed %}
+                                    <span class="badge bg-success">Completed</span>
+                                {% else %}
+                                    <span class="badge bg-warning">In Progress</span>
+                                {% endif %}
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <div class="text-center py-4 text-muted">No progress tracked yet.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

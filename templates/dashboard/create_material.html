@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Upload Material - PG Tutoring{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h3>Upload New Material</h3>
+    <div class="card mt-3">
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form.non_field_errors }}
+
+                <div class="mb-3">{{ form.title|add_class:'form-control' }}</div>
+                <div class="mb-3">{{ form.description|add_class:'form-control' }}</div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">{{ form.material_type|add_class:'form-select' }}</div>
+                    <div class="col-md-6 mb-3">{{ form.subject|add_class:'form-select' }}</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 mb-3">{{ form.difficulty_level|add_class:'form-select' }}</div>
+                    <div class="col-md-4 mb-3">{{ form.grade_level|add_class:'form-control' }}</div>
+                    <div class="col-md-4 mb-3">{{ form.estimated_time|add_class:'form-control' }}</div>
+                </div>
+                <div class="mb-3">{{ form.file }}</div>
+                <div class="mb-3">{{ form.external_link|add_class:'form-control' }}</div>
+
+                <button class="btn btn-gradient">Upload</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,226 @@
+{% extends 'base.html' %}
+
+{% block title %}Student Dashboard - PG Tutoring{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar">
+            <div class="pt-3">
+                <h5 class="text-center text-white">
+                    <i class="fas fa-graduation-cap"></i> Student Panel
+                </h5>
+                <hr class="text-white">
+                
+                <nav class="nav flex-column">
+                    <a class="nav-link active" href="#overview">
+                        <i class="fas fa-tachometer-alt"></i> Overview
+                    </a>
+                    <a class="nav-link" href="/hub/">
+                        <i class="fas fa-book-open"></i> Learning Hub
+                    </a>
+                    <a class="nav-link" href="/hub/assignments/">
+                        <i class="fas fa-tasks"></i> My Assignments
+                    </a>
+                    <a class="nav-link" href="/chat/">
+                        <i class="fas fa-comments"></i> Chat with Teacher
+                    </a>
+                    <a class="nav-link" href="/hub/progress/">
+                        <i class="fas fa-chart-line"></i> My Progress
+                    </a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10 ms-sm-auto px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">
+                    <i class="fas fa-star text-warning"></i> Welcome back, {{ user.first_name|default:user.username }}!
+                </h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <button type="button" class="btn btn-sm btn-primary">
+                        <i class="fas fa-question-circle"></i> Ask Teacher
+                    </button>
+                </div>
+            </div>
+
+            <!-- Progress Cards -->
+            <div class="row mb-4">
+                <div class="col-md-4 mb-3">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title">{{ total_assignments }}</h4>
+                                    <p class="card-text">Total Assignments</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-tasks fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <div class="card bg-success text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title">{{ completed_assignments }}</h4>
+                                    <p class="card-text">Completed</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-check-circle fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <div class="card bg-info text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title">{{ completion_rate|floatformat:1 }}%</h4>
+                                    <p class="card-text">Success Rate</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-chart-pie fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Learning Materials -->
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-book-open"></i> Available Learning Materials</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if recent_materials %}
+                                <div class="row">
+                                    {% for material in recent_materials %}
+                                        <div class="col-md-6 mb-3">
+                                            <div class="card border-left-primary h-100">
+                                                <div class="card-body">
+                                                    <h6 class="card-title">{{ material.title }}</h6>
+                                                    <p class="card-text text-muted">{{ material.subject.name }}</p>
+                                                    <p class="card-text">
+                                                        <small class="text-muted">
+                                                            <i class="fas fa-clock"></i> {{ material.estimated_time }} min
+                                                            <span class="badge bg-secondary ms-2">{{ material.difficulty_level }}</span>
+                                                        </small>
+                                                    </p>
+                                                    <a href="/hub/material/{{ material.id }}/" class="btn btn-primary btn-sm">
+                                                        <i class="fas fa-play"></i> Start Learning
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="text-center py-4 text-muted">
+                                    <i class="fas fa-book fa-3x mb-3"></i>
+                                    <p>No learning materials available yet.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-comments"></i> Recent Conversations</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if my_chats %}
+                                <div class="list-group list-group-flush">
+                                    {% for chat in my_chats %}
+                                        <a href="/chat/room/{{ chat.id }}/" class="list-group-item list-group-item-action">
+                                            <div class="d-flex w-100 justify-content-between">
+                                                <h6 class="mb-1">{{ chat.name }}</h6>
+                                                <small>{{ chat.latest_message.timestamp|timesince }} ago</small>
+                                            </div>
+                                            {% if chat.latest_message %}
+                                                <p class="mb-1">{{ chat.latest_message.content|truncatewords:8 }}</p>
+                                            {% endif %}
+                                        </a>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="text-center py-4 text-muted">
+                                    <i class="fas fa-comments fa-3x mb-3"></i>
+                                    <p>No conversations yet</p>
+                                    <a href="/chat/" class="btn btn-primary btn-sm">Start a Chat</a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Upcoming Assignments -->
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h5><i class="fas fa-calendar-alt"></i> Upcoming Assignments</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if my_assignments %}
+                                <div class="list-group list-group-flush">
+                                    {% for assignment in my_assignments %}
+                                        <div class="list-group-item">
+                                            <div class="d-flex w-100 justify-content-between">
+                                                <h6 class="mb-1">{{ assignment.title }}</h6>
+                                                <small class="text-danger">Due: {{ assignment.due_date|date:"M d" }}</small>
+                                            </div>
+                                            <p class="mb-1">{{ assignment.description|truncatewords:10 }}</p>
+                                            <small class="text-muted">{{ assignment.material.subject.name }}</small>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="text-center py-4 text-muted">
+                                    <i class="fas fa-calendar fa-3x mb-3"></i>
+                                    <p>No upcoming assignments</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Achievement Badge -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <div class="text-center">
+                                <h5><i class="fas fa-trophy text-warning"></i> Keep up the great work!</h5>
+                                <p class="text-muted">You're doing amazing in your learning journey. Patience is proud of your progress!</p>
+                                <div class="mt-3">
+                                    <span class="badge bg-warning text-dark me-2">
+                                        <i class="fas fa-star"></i> Dedicated Learner
+                                    </span>
+                                    {% if completion_rate > 80 %}
+                                        <span class="badge bg-success text-white me-2">
+                                            <i class="fas fa-medal"></i> High Achiever
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

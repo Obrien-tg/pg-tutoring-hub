@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}Assignments - PG Tutoring{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h3>Assignments</h3>
+    <div class="card mt-3">
+        <div class="card-body">
+            {% if assignments %}
+                <ul class="list-group">
+                    {% for a in assignments %}
+                        <li class="list-group-item">
+                            <h6>{{ a.title }}</h6>
+                            <p class="mb-0">{{ a.description|truncatewords:20 }}</p>
+                            <small class="text-muted">Due: {{ a.due_date }}</small>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <div class="text-center py-4 text-muted">No assignments found.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

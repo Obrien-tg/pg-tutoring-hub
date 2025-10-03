@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Send Announcement - PG Tutoring{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h3>Send Announcement</h3>
+    <div class="card mt-3">
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                {{ form.non_field_errors }}
+
+                <div class="mb-3">{{ form.recipient_group|add_class:'form-select' }}</div>
+                <div class="mb-3">{{ form.content|add_class:'form-control' }}</div>
+
+                <button class="btn btn-gradient">Send</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
