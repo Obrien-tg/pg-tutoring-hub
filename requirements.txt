@@ -1,38 +1,38 @@
-# PG Tutoring Hub - Requirements
-# Generated on October 3, 2025
+# PG Tutoring Hub - Production Requirements
+# Last updated: Security audit and deployment preparation
 
 # Core Django
 Django==5.2.7
-psycopg2-binary==2.9.7
+psycopg2-binary==2.9.9
 
-# Real-time Communication
-channels==4.0.0
-channels-redis==4.1.0
-redis==4.6.0
-
-# Forms and UI
-django-widget-tweaks==1.5.0
-
-# File Handling
-Pillow==10.0.0
-
-# Development Tools
-django-debug-toolbar==4.2.0
-
-# Production
-gunicorn==21.2.0
-whitenoise==6.5.0
-
-# Environment Management
+# Security and Environment Management
 python-decouple==3.8
 
-# Testing
-pytest-django==4.5.2
-coverage==7.3.0
+# Real-time Communication
+channels==4.1.0
+channels-redis==4.2.0
+redis==5.1.1
 
-# Code Quality
-flake8==6.0.0
-black==23.7.0
+# Forms and UI Enhancement
+django-widget-tweaks==1.5.0
 
-# Database
+# File and Media Handling
+Pillow==10.4.0
+whitenoise==6.7.0
+
+# Production Server
+gunicorn==21.2.0
+
+# Database URL parsing (optional)
 dj-database-url==2.1.0
+
+# Development Tools (remove in production)
+django-debug-toolbar==4.4.6
+
+# Testing (development/CI only)
+pytest-django==4.5.2
+coverage==7.4.0
+
+# Code Quality (development only)
+flake8==7.0.0
+black==24.0.0
