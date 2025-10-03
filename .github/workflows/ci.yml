@@ -64,4 +64,6 @@ jobs:
           python manage.py makemigrations --check --dry-run
       - name: Run tests
         run: |
-          python manage.py test -v 2
+          pip install coverage
+          coverage run manage.py test -v 2
+          coverage report --fail-under=60

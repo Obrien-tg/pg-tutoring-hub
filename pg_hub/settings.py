@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # Security hardening
+    'axes',
     'core',
     'users',
     'chat',
@@ -57,6 +59,8 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    # django-axes middleware monitors login attempts
+    'axes.middleware.AxesMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -180,6 +184,19 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 LOGIN_URL = '/users/login/'
 LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/'
+
+# django-axes configuration (rate-limiting and lockouts)
+AXES_ENABLED = config('AXES_ENABLED', default=not DEBUG, cast=bool)
+AXES_FAILURE_LIMIT = config('AXES_FAILURE_LIMIT', default=5, cast=int)
+AXES_COOLOFF_TIME = config('AXES_COOLOFF_TIME', default=1, cast=int)  # hours
+AXES_LOCK_OUT_BY_COMBINATION_USER_AND_IP = True
+AXES_RESET_COOL_OFF_ON_SUCCESS = True
+AXES_ONLY_USER_FAILURES = False
+AXES_LOCKOUT_PARAMETERS = [
+    'username',
+    'ip_address',
+]
+AXES_LOCKOUT_TEMPLATE = 'axes/lockout.html'
 
 # Security Settings
 if not DEBUG:
