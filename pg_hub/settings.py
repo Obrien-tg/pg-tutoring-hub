@@ -11,11 +11,14 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
-import os
 from decouple import config, Csv
+import importlib.util
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Ensure logs directory exists to avoid FileHandler errors
+(BASE_DIR / 'logs').mkdir(parents=True, exist_ok=True)
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-paa)0d^(ckmbv$#=_v1&tvy9&6@*j%8wvp(yq56ju#g)(5=l(k')
@@ -24,6 +27,9 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-paa)0d^(ckmbv$#=_v1&t
 DEBUG = config('DEBUG', default=False, cast=bool)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=Csv())
+
+# Admin URL can be customized for security-by-obscurity (do not rely on this alone)
+ADMIN_URL = config('ADMIN_URL', default='admin/')
 
 
 # Application definition
@@ -54,6 +60,12 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+# Optional Content Security Policy (CSP). Requires django-csp if enabled.
+USE_CSP = config('USE_CSP', default=False, cast=bool)
+if USE_CSP and importlib.util.find_spec('csp') is not None:
+    # Insert CSP middleware after SecurityMiddleware
+    MIDDLEWARE.insert(1, 'csp.middleware.CSPMiddleware')
 
 ROOT_URLCONF = 'pg_hub.urls'
 
@@ -130,6 +142,10 @@ STATICFILES_DIRS = [
 ]
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+# Use WhiteNoise optimized storage in production
+if not DEBUG:
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
@@ -176,6 +192,10 @@ if not DEBUG:
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
 
+    # Respect X-Forwarded-Proto when behind a proxy/load balancer if configured
+    if config('SECURE_PROXY_SSL_HEADER', default='', cast=str):
+        SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 # Session Configuration
 SESSION_COOKIE_AGE = 86400  # 24 hours
 SESSION_SAVE_EVERY_REQUEST = True
@@ -216,6 +236,24 @@ if not DEBUG:
     CSRF_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Strict'
     CSRF_COOKIE_SAMESITE = 'Strict'
+
+    # Frame options and referrer policy
+    X_FRAME_OPTIONS = 'DENY'
+    SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
+
+    # Optional Content Security Policy defaults (only if django-csp middleware enabled)
+    if USE_CSP and importlib.util.find_spec('csp') is not None:
+        # Safe defaults; adjust via environment if needed
+        CSP_DEFAULT_SRC = ("'self'",)
+        CSP_IMG_SRC = ("'self'", 'data:')
+        CSP_SCRIPT_SRC = ("'self'",)
+        CSP_STYLE_SRC = ("'self'", "'unsafe-inline'")
+        CSP_FONT_SRC = ("'self'", 'data:')
+        CSP_CONNECT_SRC = ("'self'",)
+
+# Database SSL requirement (optional)
+if config('DB_SSL_REQUIRE', default=False, cast=bool):
+    DATABASES['default'].setdefault('OPTIONS', {})['sslmode'] = 'require'
 
 # Logging Configuration
 LOGGING = {

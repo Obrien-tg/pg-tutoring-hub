@@ -18,9 +18,13 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.http import JsonResponse
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    # Configurable admin URL (default 'admin/') configured via settings.ADMIN_URL
+    path(getattr(settings, 'ADMIN_URL', 'admin/'), admin.site.urls),
+    # Lightweight health check endpoint
+    path('healthz', lambda request: JsonResponse({'status': 'ok'})),
     path('', include('core.urls')),
     path('users/', include('users.urls')),
     path('dashboard/', include('dashboard.urls')),
