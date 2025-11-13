@@ -8,8 +8,9 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 
-from .models import Assignment, AssignmentSubmission, Material, StudentProgress
 from users.firebase_utils import send_submission_notification
+
+from .models import Assignment, AssignmentSubmission, Material, StudentProgress
 
 
 def materials_list(request):
