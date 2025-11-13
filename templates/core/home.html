@@ -20,12 +20,6 @@
         .feature-card:hover {
             transform: translateY(-5px);
         }
-        .teacher-img {
-            border-radius: 50%;
-            width: 200px;
-            height: 200px;
-            object-fit: cover;
-        }
     </style>
 </head>
 <body>
@@ -139,7 +133,7 @@
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-lg-6">
-                    <img src="https://via.placeholder.com/400x400/6c757d/ffffff?text=Patience+Gwanyanya" alt="Patience Gwanyanya" class="teacher-img mx-auto d-block mb-4">
+                    {% include 'components/tutor_card.html' %}
                 </div>
                 <div class="col-lg-6">
                     <h2 class="mb-4">Meet Your Teacher: Patience Gwanyanya</h2>

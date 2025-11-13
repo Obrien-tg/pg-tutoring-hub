@@ -35,6 +35,9 @@ ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="localhost,127.0.0.1", cast=Csv(
 # Admin URL can be customized for security-by-obscurity (do not rely on this alone)
 ADMIN_URL = config("ADMIN_URL", default="admin/")
 
+# App Configuration
+APP_NAME = "PG Tutoring Hub"  # Change anytime → auto-updates everywhere
+
 
 # Application definition
 
