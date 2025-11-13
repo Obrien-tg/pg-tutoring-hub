@@ -269,7 +269,9 @@ def send_submission_notification(submission):
     }
 
     # Send to the teacher who created the assignment
-    return send_notification_to_user(submission.assignment.created_by, notification_data, data)
+    return send_notification_to_user(
+        submission.assignment.created_by, notification_data, data
+    )
 
 
 # Utility function to clean up inactive tokens

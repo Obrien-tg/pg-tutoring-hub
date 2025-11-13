@@ -26,7 +26,7 @@ class AssignmentSubmissionTestCase(TestCase):
             password="password123",
             user_type="teacher",
             first_name="John",
-            last_name="Doe"
+            last_name="Doe",
         )
 
         self.student = User.objects.create_user(
@@ -37,20 +37,17 @@ class AssignmentSubmissionTestCase(TestCase):
             first_name="Jane",
             last_name="Smith",
             grade_level="9",
-            parent_email="parent@example.com"
+            parent_email="parent@example.com",
         )
 
         # Create Firebase token for teacher
         FirebaseToken.objects.create(
-            user=self.teacher,
-            token="test_fcm_token_teacher",
-            is_active=True
+            user=self.teacher, token="test_fcm_token_teacher", is_active=True
         )
 
         # Create subject and material
         self.subject = Subject.objects.create(
-            name="Mathematics",
-            description="Math subject"
+            name="Mathematics", description="Math subject"
         )
 
         self.material = Material.objects.create(
@@ -62,7 +59,7 @@ class AssignmentSubmissionTestCase(TestCase):
             grade_level="9",
             estimated_time=60,
             uploaded_by=self.teacher,
-            external_link="https://example.com/algebra.pdf"
+            external_link="https://example.com/algebra.pdf",
         )
 
         # Create assignment
@@ -71,7 +68,7 @@ class AssignmentSubmissionTestCase(TestCase):
             description="Solve all problems",
             material=self.material,
             due_date=timezone.now() + timezone.timedelta(days=7),
-            created_by=self.teacher
+            created_by=self.teacher,
         )
         self.assignment.assigned_to.add(self.student)
 
@@ -88,8 +85,8 @@ class AssignmentSubmissionTestCase(TestCase):
             {
                 "submission_text": "Here is my solution",
                 "submission_notes": "Please review carefully",
-                "submission_file": test_file
-            }
+                "submission_file": test_file,
+            },
         )
 
         # Check redirect
@@ -98,8 +95,7 @@ class AssignmentSubmissionTestCase(TestCase):
 
         # Check submission was created
         submission = AssignmentSubmission.objects.get(
-            assignment=self.assignment,
-            student=self.student
+            assignment=self.assignment, student=self.student
         )
         self.assertEqual(submission.submission_text, "Here is my solution")
         self.assertEqual(submission.submission_notes, "Please review carefully")
@@ -114,15 +110,14 @@ class AssignmentSubmissionTestCase(TestCase):
             reverse("hub:submit_assignment", args=[self.assignment.id]),
             {
                 "submission_text": "Here is my text solution",
-                "submission_notes": "No file needed"
-            }
+                "submission_notes": "No file needed",
+            },
         )
 
         self.assertEqual(response.status_code, 302)
 
         submission = AssignmentSubmission.objects.get(
-            assignment=self.assignment,
-            student=self.student
+            assignment=self.assignment, student=self.student
         )
         self.assertEqual(submission.submission_text, "Here is my text solution")
         self.assertIsNone(submission.submission_file)
@@ -133,18 +128,19 @@ class AssignmentSubmissionTestCase(TestCase):
 
         response = self.client.post(
             reverse("hub:submit_assignment", args=[self.assignment.id]),
-            {"submission_notes": "Empty submission"}
+            {"submission_notes": "Empty submission"},
         )
 
         # Should return to form with error
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Please provide either text submission or upload a file")
+        self.assertContains(
+            response, "Please provide either text submission or upload a file"
+        )
 
         # No submission should be created
         self.assertFalse(
             AssignmentSubmission.objects.filter(
-                assignment=self.assignment,
-                student=self.student
+                assignment=self.assignment, student=self.student
             ).exists()
         )
 
@@ -157,13 +153,13 @@ class AssignmentSubmissionTestCase(TestCase):
             password="password123",
             user_type="student",
             grade_level="10",
-            parent_email="parent2@example.com"
+            parent_email="parent2@example.com",
         )
         self.client.login(username="student2", password="password123")
 
         response = self.client.post(
             reverse("hub:submit_assignment", args=[self.assignment.id]),
-            {"submission_text": "Unauthorized submission"}
+            {"submission_text": "Unauthorized submission"},
         )
 
         self.assertEqual(response.status_code, 302)
@@ -180,7 +176,7 @@ class AssignmentSubmissionTestCase(TestCase):
 
         response = self.client.post(
             reverse("hub:submit_assignment", args=[self.assignment.id]),
-            {"submission_text": "Teacher trying to submit"}
+            {"submission_text": "Teacher trying to submit"},
         )
 
         self.assertEqual(response.status_code, 302)
@@ -193,22 +189,21 @@ class AssignmentSubmissionTestCase(TestCase):
             assignment=self.assignment,
             student=self.student,
             submission_text="Initial submission",
-            status="submitted"
+            status="submitted",
         )
 
         self.client.force_login(self.student)
 
         response = self.client.post(
             reverse("hub:submit_assignment", args=[self.assignment.id]),
-            {"submission_text": "Updated submission"}
+            {"submission_text": "Updated submission"},
         )
 
         self.assertEqual(response.status_code, 302)
 
         # Should still be only one submission
         submissions = AssignmentSubmission.objects.filter(
-            assignment=self.assignment,
-            student=self.student
+            assignment=self.assignment, student=self.student
         )
         self.assertEqual(submissions.count(), 1)
 
@@ -219,21 +214,23 @@ class AssignmentSubmissionTestCase(TestCase):
         """Test getting the submission form"""
         self.client.force_login(self.student)
 
-        response = self.client.get(reverse("hub:submit_assignment", args=[self.assignment.id]))
+        response = self.client.get(
+            reverse("hub:submit_assignment", args=[self.assignment.id])
+        )
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "hub/submit_assignment.html")
         self.assertEqual(response.context["assignment"], self.assignment)
         self.assertIsNone(response.context["existing_submission"])
 
-    @patch('users.firebase_utils.send_submission_notification')
+    @patch("users.firebase_utils.send_submission_notification")
     def test_submission_triggers_firebase_push(self, mock_send_notification):
         """Test that assignment submission triggers Firebase push notification"""
         self.client.force_login(self.student)
 
         response = self.client.post(
             reverse("hub:submit_assignment", args=[self.assignment.id]),
-            {"submission_text": "Test submission for Firebase"}
+            {"submission_text": "Test submission for Firebase"},
         )
 
         self.assertEqual(response.status_code, 302)
@@ -241,7 +238,6 @@ class AssignmentSubmissionTestCase(TestCase):
         # Check that Firebase notification was called
         mock_send_notification.assert_called_once()
         submission = AssignmentSubmission.objects.get(
-            assignment=self.assignment,
-            student=self.student
+            assignment=self.assignment, student=self.student
         )
         mock_send_notification.assert_called_with(submission)
