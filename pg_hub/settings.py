@@ -54,6 +54,9 @@ INSTALLED_APPS = [
     "dashboard",
     "channels",
     "widget_tweaks",
+    # API
+    "rest_framework",
+    "drf_spectacular",
 ]
 
 MIDDLEWARE = [
@@ -175,6 +178,11 @@ AUTHENTICATION_BACKENDS = [
     "axes.backends.AxesStandaloneBackend",
     "django.contrib.auth.backends.ModelBackend",
 ]
+
+# Django REST Framework
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
 
 # Channels configuration for real-time chat
 ASGI_APPLICATION = "pg_hub.asgi.application"

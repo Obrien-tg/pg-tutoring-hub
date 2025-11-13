@@ -40,3 +40,6 @@ coverage==7.4.0
 # Code Quality (development only)
 flake8==7.0.0
 black==24.10.0
+
+# Firebase for push notifications
+firebase-admin==6.5.0

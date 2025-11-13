@@ -250,6 +250,28 @@ def send_progress_notification(user, achievement):
     return send_notification_to_user(user, notification_data, data)
 
 
+def send_submission_notification(submission):
+    """Send notification when student submits assignment"""
+    title = "Assignment Submitted"
+    body = f"{submission.student.get_full_name()} submitted '{submission.assignment.title}'"
+
+    notification_data = {
+        "title": title,
+        "body": body,
+        "icon": "/static/img/submission-icon.png",
+    }
+
+    data = {
+        "type": "submission",
+        "assignment_id": str(submission.assignment.id),
+        "submission_id": str(submission.id),
+        "student_id": str(submission.student.id),
+    }
+
+    # Send to the teacher who created the assignment
+    return send_notification_to_user(submission.assignment.created_by, notification_data, data)
+
+
 # Utility function to clean up inactive tokens
 def cleanup_inactive_tokens():
     """Remove tokens that are no longer valid"""
