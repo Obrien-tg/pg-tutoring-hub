@@ -32,6 +32,14 @@ DEBUG = config("DEBUG", default=False, cast=bool)
 
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="localhost,127.0.0.1", cast=Csv())
 
+# Add Render's dynamic host if available
+RENDER_EXTERNAL_URL = config("RENDER_EXTERNAL_URL", default="")
+if RENDER_EXTERNAL_URL:
+    from urllib.parse import urlparse
+    render_host = urlparse(RENDER_EXTERNAL_URL).netloc
+    if render_host and render_host not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(render_host)
+
 # Admin URL can be customized for security-by-obscurity (do not rely on this alone)
 ADMIN_URL = config("ADMIN_URL", default="admin/")
 
@@ -110,16 +118,28 @@ if config("USE_SQLITE", default=False, cast=bool):
         }
     }
 else:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": config("POSTGRES_DB", default="pg_tutoring"),
-            "USER": config("POSTGRES_USER", default="pguser"),
-            "PASSWORD": config("POSTGRES_PASSWORD", default="pgpass123"),
-            "HOST": config("POSTGRES_HOST", default="db"),
-            "PORT": config("POSTGRES_PORT", default="5432"),
+    # Check for DATABASE_URL (Render, Heroku, etc.)
+    DATABASE_URL = config("DATABASE_URL", default="")
+    if DATABASE_URL:
+        import dj_database_url
+        DATABASES = {
+            "default": dj_database_url.config(
+                default=DATABASE_URL,
+                conn_max_age=600,
+                conn_health_checks=True,
+            )
         }
-    }
+    else:
+        DATABASES = {
+            "default": {
+                "ENGINE": "django.db.backends.postgresql",
+                "NAME": config("POSTGRES_DB", default="pg_tutoring"),
+                "USER": config("POSTGRES_USER", default="pguser"),
+                "PASSWORD": config("POSTGRES_PASSWORD", default="pgpass123"),
+                "HOST": config("POSTGRES_HOST", default="db"),
+                "PORT": config("POSTGRES_PORT", default="5432"),
+            }
+        }
 
 
 # Password validation
@@ -188,19 +208,33 @@ REST_FRAMEWORK = {
 # Channels configuration for real-time chat
 ASGI_APPLICATION = "pg_hub.asgi.application"
 
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [
-                (
-                    config("REDIS_HOST", default="127.0.0.1"),
-                    config("REDIS_PORT", default=6379, cast=int),
-                )
-            ],
+# Redis configuration for channels
+REDIS_URL = config("REDIS_URL", default="")
+if REDIS_URL:
+    import dj_database_url
+    redis_config = dj_database_url.parse(REDIS_URL)
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {
+                "hosts": [(redis_config["HOST"], redis_config["PORT"])],
+            },
         },
-    },
-}
+    }
+else:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {
+                "hosts": [
+                    (
+                        config("REDIS_HOST", default="127.0.0.1"),
+                        config("REDIS_PORT", default=6379, cast=int),
+                    )
+                ],
+            },
+        },
+    }
 
 # Media files (for student materials upload)
 MEDIA_URL = "/media/"
@@ -267,12 +301,23 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 1000
 
 # Cache Configuration (for production)
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": f"redis://{config('REDIS_HOST', default='127.0.0.1')}:{config('REDIS_PORT', default='6379')}/1",
+REDIS_URL = config("REDIS_URL", default="")
+if REDIS_URL:
+    import dj_database_url
+    redis_config = dj_database_url.parse(REDIS_URL)
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.redis.RedisCache",
+            "LOCATION": f"redis://{redis_config['HOST']}:{redis_config['PORT']}/1",
+        }
     }
-}
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.redis.RedisCache",
+            "LOCATION": f"redis://{config('REDIS_HOST', default='127.0.0.1')}:{config('REDIS_PORT', default='6379')}/1",
+        }
+    }
 
 # Security Settings for Production
 if not DEBUG:
