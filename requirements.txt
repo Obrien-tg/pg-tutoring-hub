@@ -27,7 +27,7 @@ django-axes==6.5.1
 # Production Server
 gunicorn==21.2.0
 
-# Database URL parsing (optional)
+# Database URL parsing (for Render, Heroku, etc.)
 dj-database-url==2.1.0
 
 # Development Tools (remove in production)

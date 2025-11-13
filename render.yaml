@@ -1,0 +1,45 @@
+services:
+  - type: web
+    name: pg-tutoring-hub
+    runtime: docker
+    plan: starter
+    buildCommand: docker build -t pg-tutoring-hub .
+    startCommand: docker run -p $PORT:8000 pg-tutoring-hub
+    envVars:
+      - key: DEBUG
+        value: false
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          type: postgresql
+          plan: starter
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          plan: starter
+          name: pg-tutoring-redis
+      - key: ALLOWED_HOSTS
+        fromService:
+          type: web
+          name: pg-tutoring-hub
+          property: host
+      - key: EMAIL_HOST
+        value: smtp.gmail.com
+      - key: EMAIL_PORT
+        value: 587
+      - key: DEFAULT_FROM_EMAIL
+        value: PG Tutoring Hub <noreply@pgtutoringhub.onrender.com>
+      - key: APP_NAME
+        value: PG Tutoring Hub
+
+  - type: redis
+    name: pg-tutoring-redis
+    plan: starter
+    ipAllowList: []  # Only accessible by other services in this project
+
+databases:
+  - name: pg-tutoring-db
+    databaseName: pg_tutoring_hub
+    user: pg_tutoring_user
+    plan: starter
