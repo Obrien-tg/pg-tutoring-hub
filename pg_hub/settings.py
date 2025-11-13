@@ -99,8 +99,6 @@ WSGI_APPLICATION = "pg_hub.wsgi.application"
 
 
 # Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
 if config("USE_SQLITE", default=False, cast=bool):
     DATABASES = {
         "default": {
@@ -112,11 +110,11 @@ else:
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
-            "NAME": config("DB_NAME", default="pg_tutoring_db"),
-            "USER": config("DB_USER", default="tutoring_admin"),
-            "PASSWORD": config("DB_PASSWORD", default="1234"),
-            "HOST": config("DB_HOST", default="localhost"),
-            "PORT": config("DB_PORT", default="5432"),
+            "NAME": config("POSTGRES_DB", default="pg_tutoring"),
+            "USER": config("POSTGRES_USER", default="pguser"),
+            "PASSWORD": config("POSTGRES_PASSWORD", default="pgpass123"),
+            "HOST": config("POSTGRES_HOST", default="db"),
+            "PORT": config("POSTGRES_PORT", default="5432"),
         }
     }
 
@@ -191,7 +189,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],
+            "hosts": [(config("REDIS_HOST", default="127.0.0.1"), config("REDIS_PORT", default=6379, cast=int))],
         },
     },
 }
