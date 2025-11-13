@@ -15,63 +15,168 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Subject',
+            name="Subject",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100)),
-                ('description', models.TextField(blank=True)),
-                ('color_code', models.CharField(default='#007bff', max_length=7)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=100)),
+                ("description", models.TextField(blank=True)),
+                ("color_code", models.CharField(default="#007bff", max_length=7)),
             ],
         ),
         migrations.CreateModel(
-            name='Material',
+            name="Material",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=200)),
-                ('description', models.TextField()),
-                ('material_type', models.CharField(choices=[('worksheet', 'Worksheet'), ('test', 'Test'), ('assignment', 'Assignment'), ('reading', 'Reading Material'), ('video', 'Video'), ('game', 'Educational Game')], max_length=20)),
-                ('difficulty_level', models.CharField(choices=[('beginner', 'Beginner'), ('intermediate', 'Intermediate'), ('advanced', 'Advanced')], max_length=20)),
-                ('file', models.FileField(blank=True, null=True, upload_to='materials/')),
-                ('external_link', models.URLField(blank=True)),
-                ('grade_level', models.CharField(max_length=20)),
-                ('estimated_time', models.IntegerField(help_text='Estimated time in minutes')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('is_active', models.BooleanField(default=True)),
-                ('uploaded_by', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
-                ('subject', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='hub.subject')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("title", models.CharField(max_length=200)),
+                ("description", models.TextField()),
+                (
+                    "material_type",
+                    models.CharField(
+                        choices=[
+                            ("worksheet", "Worksheet"),
+                            ("test", "Test"),
+                            ("assignment", "Assignment"),
+                            ("reading", "Reading Material"),
+                            ("video", "Video"),
+                            ("game", "Educational Game"),
+                        ],
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "difficulty_level",
+                    models.CharField(
+                        choices=[
+                            ("beginner", "Beginner"),
+                            ("intermediate", "Intermediate"),
+                            ("advanced", "Advanced"),
+                        ],
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "file",
+                    models.FileField(blank=True, null=True, upload_to="materials/"),
+                ),
+                ("external_link", models.URLField(blank=True)),
+                ("grade_level", models.CharField(max_length=20)),
+                (
+                    "estimated_time",
+                    models.IntegerField(help_text="Estimated time in minutes"),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("is_active", models.BooleanField(default=True)),
+                (
+                    "uploaded_by",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "subject",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="hub.subject"
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-created_at'],
+                "ordering": ["-created_at"],
             },
         ),
         migrations.CreateModel(
-            name='Assignment',
+            name="Assignment",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=200)),
-                ('description', models.TextField()),
-                ('due_date', models.DateTimeField()),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('assigned_to', models.ManyToManyField(related_name='assignments', to=settings.AUTH_USER_MODEL)),
-                ('created_by', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='created_assignments', to=settings.AUTH_USER_MODEL)),
-                ('material', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='hub.material')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("title", models.CharField(max_length=200)),
+                ("description", models.TextField()),
+                ("due_date", models.DateTimeField()),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "assigned_to",
+                    models.ManyToManyField(
+                        related_name="assignments", to=settings.AUTH_USER_MODEL
+                    ),
+                ),
+                (
+                    "created_by",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="created_assignments",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "material",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="hub.material"
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='StudentProgress',
+            name="StudentProgress",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('started_at', models.DateTimeField(auto_now_add=True)),
-                ('completed_at', models.DateTimeField(blank=True, null=True)),
-                ('score', models.IntegerField(blank=True, help_text='Score out of 100', null=True)),
-                ('teacher_notes', models.TextField(blank=True)),
-                ('student_notes', models.TextField(blank=True)),
-                ('material', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='hub.material')),
-                ('student', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("started_at", models.DateTimeField(auto_now_add=True)),
+                ("completed_at", models.DateTimeField(blank=True, null=True)),
+                (
+                    "score",
+                    models.IntegerField(
+                        blank=True, help_text="Score out of 100", null=True
+                    ),
+                ),
+                ("teacher_notes", models.TextField(blank=True)),
+                ("student_notes", models.TextField(blank=True)),
+                (
+                    "material",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="hub.material"
+                    ),
+                ),
+                (
+                    "student",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'unique_together': {('student', 'material')},
+                "unique_together": {("student", "material")},
             },
         ),
     ]

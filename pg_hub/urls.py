@@ -14,22 +14,24 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
-from django.urls import path, include
+
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib import admin
 from django.http import JsonResponse
+from django.urls import include, path
 
 urlpatterns = [
     # Configurable admin URL (default 'admin/') configured via settings.ADMIN_URL
-    path(getattr(settings, 'ADMIN_URL', 'admin/'), admin.site.urls),
+    path(getattr(settings, "ADMIN_URL", "admin/"), admin.site.urls),
     # Lightweight health check endpoint
-    path('healthz', lambda request: JsonResponse({'status': 'ok'})),
-    path('', include('core.urls')),
-    path('users/', include('users.urls')),
-    path('dashboard/', include('dashboard.urls')),
-    path('hub/', include('hub.urls')),
-    path('chat/', include('chat.urls')),
+    path("healthz", lambda request: JsonResponse({"status": "ok"})),
+    path("", include("core.urls")),
+    path("users/", include("users.urls")),
+    path("dashboard/", include("dashboard.urls")),
+    path("hub/", include("hub.urls")),
+    path("chat/", include("chat.urls")),
+    path("api/firebase/", include("users.firebase_urls")),
 ]
 
 # Serve media files during development

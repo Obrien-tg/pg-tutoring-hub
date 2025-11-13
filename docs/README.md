@@ -1,6 +1,7 @@
 # PG Tutoring Hub - Project Documentation
 
 ## Overview
+
 PG Tutoring Hub is a comprehensive web application built with Django to support Patience Gwanyanya's tutoring business. The platform provides user management, educational content delivery, real-time communication, and progress tracking.
 
 ## 🏗️ Project Structure
@@ -23,22 +24,26 @@ pg_tutoring_hub/
 ## 🎯 Features
 
 ### User Management
+
 - **Multi-role system**: Students, Parents, Teachers
 - **Custom user model** with role-specific fields
 - **Registration flow** with role-based redirects
 - **Profile management** with image uploads
 
 ### Dashboards
+
 - **Teacher Dashboard**: Manage students, create materials/assignments
 - **Student Dashboard**: Access materials, view assignments, track progress
 - **Parent Dashboard**: Monitor children's progress and communication
 
 ### Educational Hub
+
 - **Material Management**: Upload and organize learning materials
 - **Assignment System**: Create and assign tasks to students
 - **Progress Tracking**: Monitor completion rates and performance
 
 ### Communication
+
 - **Real-time Chat**: WebSocket-based messaging system
 - **Announcements**: Broadcast messages to groups
 - **Direct Communication**: Teacher-student/parent messaging
@@ -55,21 +60,25 @@ pg_tutoring_hub/
 ## 📝 Quick Start
 
 1. **Activate virtual environment**:
+
    ```bash
    source venv/bin/activate
    ```
 
 2. **Run migrations**:
+
    ```bash
    python manage.py migrate
    ```
 
 3. **Create superuser** (Teacher account):
+
    ```bash
    echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('patience', 'patience@pgtutoring.com', '1234', user_type='teacher')" | python manage.py shell
    ```
 
 4. **Start development server**:
+
    ```bash
    python manage.py runserver 8001
    ```
@@ -79,6 +88,7 @@ pg_tutoring_hub/
 ## 🔐 User Roles & Permissions
 
 ### Teacher (Patience)
+
 - Full system access
 - Create and manage materials
 - Assign tasks to students
@@ -87,6 +97,7 @@ pg_tutoring_hub/
 - Manage user accounts
 
 ### Students
+
 - Access assigned materials
 - Submit assignments
 - Chat with teacher
@@ -94,6 +105,7 @@ pg_tutoring_hub/
 - Update profile information
 
 ### Parents
+
 - View children's progress
 - Communicate with teacher
 - Receive announcements
@@ -117,20 +129,24 @@ pg_tutoring_hub/
 ## 📊 Database Models
 
 ### Users App
+
 - `CustomUser`: Extended user model with role and profile fields
 
 ### Hub App
+
 - `Material`: Educational content uploads
 - `Assignment`: Tasks assigned to students
 - `StudentProgress`: Completion tracking
 
 ### Chat App
+
 - `ChatRoom`: Communication channels
 - `Message`: Individual messages
 
 ## 🎨 Design System
 
 ### Colors
+
 - Primary: #667eea (Blue)
 - Secondary: #764ba2 (Purple)
 - Accent: #fcb69f (Peach)
@@ -139,6 +155,7 @@ pg_tutoring_hub/
 - Danger: #dc3545
 
 ### Components
+
 - Gradient buttons and backgrounds
 - Card-based layouts
 - Responsive design
@@ -148,12 +165,14 @@ pg_tutoring_hub/
 ## 🔧 Development Guidelines
 
 ### Code Organization
+
 - Each app has specific responsibility
 - Templates organized by app
 - Static files centralized
 - Media files organized by type
 
 ### Best Practices
+
 - Use Django's built-in features
 - Follow Django naming conventions
 - Write descriptive commit messages
@@ -176,4 +195,4 @@ For technical support or questions about the PG Tutoring Hub, contact the develo
 
 ---
 
-*Last updated: October 3, 2025*
+_Last updated: October 3, 2025_
