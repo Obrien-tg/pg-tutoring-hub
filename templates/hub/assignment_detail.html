@@ -1,0 +1,244 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Assignment: {{ assignment.title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard:dashboard' %}" class="text-decoration-none"><i class="fas fa-home"></i> Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'hub:assignments_list' %}" class="text-decoration-none">Assignments</a></li>
+            <li class="breadcrumb-item active">{{ assignment.title }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Assignment Details -->
+        <div class="col-lg-8">
+            <div class="kids-card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="mb-0">
+                        <i class="fas fa-clipboard-list text-primary"></i>
+                        {{ assignment.title }}
+                    </h2>
+                    <span class="badge badge-{{ assignment.priority|default:'secondary' }} fs-6">
+                        {{ assignment.get_priority_display }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <!-- Due Date Alert -->
+                    <div class="alert alert-info d-flex align-items-center mb-4">
+                        <i class="fas fa-calendar-alt me-2"></i>
+                        <div>
+                            <strong>Due Date:</strong> {{ assignment.due_date|date:"F d, Y \a\t g:i A" }}
+                            {% if assignment.is_overdue %}
+                                <span class="badge bg-danger ms-2">Overdue</span>
+                            {% else %}
+                                <span class="text-muted ms-2">({{ assignment.days_until_due }} days left)</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="mb-4">
+                        <h4><i class="fas fa-info-circle text-info"></i> Description</h4>
+                        <p class="fs-5">{{ assignment.description }}</p>
+                    </div>
+
+                    <!-- Instructions -->
+                    {% if assignment.instructions %}
+                    <div class="mb-4">
+                        <h4><i class="fas fa-list-ul text-success"></i> Instructions</h4>
+                        <div class="alert alert-light border-start border-success border-4">
+                            {{ assignment.instructions|linebreaks }}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Material Link -->
+                    {% if assignment.material %}
+                    <div class="mb-4">
+                        <h4><i class="fas fa-book text-warning"></i> Related Material</h4>
+                        <div class="d-flex align-items-center p-3 bg-light rounded">
+                            <div class="subject-badge me-3" style="background-color: {{ assignment.material.subject.color_code }};">
+                                {{ assignment.material.subject.name|slice:":2"|upper }}
+                            </div>
+                            <div>
+                                <h6 class="mb-1">{{ assignment.material.title }}</h6>
+                                <p class="text-muted mb-0">{{ assignment.material.description|truncatewords:15 }}</p>
+                            </div>
+                            <a href="{% url 'hub:material_detail' assignment.material.pk %}" class="btn btn-outline-primary ms-auto">
+                                <i class="fas fa-external-link-alt"></i> View Material
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Submission Panel -->
+        <div class="col-lg-4">
+            <div class="kids-card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-upload text-success"></i>
+                        Assignment Submission
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% if submission %}
+                        <!-- Existing Submission -->
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle me-2"></i>
+                            <strong>Submitted!</strong><br>
+                            <small>{{ submission.submitted_at|date:"M d, Y \a\t g:i A" }}</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <strong>Status:</strong>
+                            <span class="badge badge-{{ submission.status }}">
+                                {{ submission.get_status_display }}
+                            </span>
+                        </div>
+
+                        {% if submission.grade %}
+                        <div class="mb-3">
+                            <strong>Grade:</strong>
+                            <span class="badge bg-primary">{{ submission.grade }}</span>
+                            {% if submission.numeric_score %}
+                                <small class="text-muted">({{ submission.numeric_score }}%)</small>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                        {% if submission.teacher_feedback %}
+                        <div class="mb-3">
+                            <strong>Teacher Feedback:</strong>
+                            <div class="alert alert-info mt-2">
+                                {{ submission.teacher_feedback|linebreaks }}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- View/Edit Submission -->
+                        <a href="{% url 'hub:submit_assignment' assignment.id %}" class="btn btn-warning btn-lg w-100">
+                            <i class="fas fa-edit"></i> Update Submission
+                        </a>
+
+                    {% elif can_submit %}
+                        <!-- No Submission Yet -->
+                        <div class="text-center mb-4">
+                            <i class="fas fa-clipboard-check text-muted" style="font-size: 3rem;"></i>
+                            <p class="text-muted mt-2">No submission yet</p>
+                        </div>
+
+                        <div class="mb-3">
+                            <strong>Maximum Points:</strong>
+                            <span class="badge bg-info">{{ assignment.max_score }} points</span>
+                        </div>
+
+                        {% if assignment.submission_format %}
+                        <div class="mb-3">
+                            <strong>Format:</strong>
+                            <small class="text-muted d-block">{{ assignment.submission_format }}</small>
+                        </div>
+                        {% endif %}
+
+                        <a href="{% url 'hub:submit_assignment' assignment.id %}" class="btn btn-success btn-lg w-100">
+                            <i class="fas fa-upload"></i> Submit Assignment
+                        </a>
+
+                    {% else %}
+                        <!-- Not Authorized -->
+                        <div class="alert alert-warning text-center">
+                            <i class="fas fa-lock me-2"></i>
+                            You are not authorized to submit this assignment.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Assignment Stats -->
+            <div class="kids-card mt-3">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-bar text-info"></i>
+                        Assignment Info
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="stat-item">
+                                <i class="fas fa-trophy text-warning"></i>
+                                <div class="stat-value">{{ assignment.max_score }}</div>
+                                <div class="stat-label">Max Points</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="stat-item">
+                                <i class="fas fa-clock text-info"></i>
+                                <div class="stat-value">{{ assignment.material.estimated_time|default:"30" }}</div>
+                                <div class="stat-label">Est. Minutes</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="small text-muted">
+                        <div><strong>Created by:</strong> {{ assignment.created_by.get_full_name|default:assignment.created_by.username }}</div>
+                        <div><strong>Created:</strong> {{ assignment.created_at|date:"M d, Y" }}</div>
+                        {% if assignment.material.grade_level %}
+                        <div><strong>Grade Level:</strong> {{ assignment.material.get_grade_level_display }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.subject-badge {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 0.8rem;
+}
+
+.stat-item {
+    padding: 10px;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--kids-primary);
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: var(--bs-secondary);
+    margin-top: 5px;
+}
+
+.badge-low { background-color: #28a745; }
+.badge-medium { background-color: #ffc107; color: #000; }
+.badge-high { background-color: #fd7e14; }
+.badge-urgent { background-color: #dc3545; }
+
+.badge-submitted { background-color: #17a2b8; }
+.badge-under_review { background-color: #ffc107; color: #000; }
+.badge-graded { background-color: #28a745; }
+.badge-returned { background-color: #dc3545; }
+</style>
+{% endblock %}

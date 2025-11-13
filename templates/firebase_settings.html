@@ -1,0 +1,319 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Firebase Settings - PG Tutoring{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-fire"></i> Firebase Integration Settings
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Firebase Status -->
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-info-circle"></i> Firebase Status</h5>
+                            <div id="firebase-status" class="alert alert-info">
+                                <i class="fas fa-spinner fa-spin"></i> Checking Firebase connection...
+                            </div>
+                            
+                            <h5 class="mt-4"><i class="fas fa-bell"></i> Notification Settings</h5>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="notifications-enabled" checked>
+                                <label class="form-check-label" for="notifications-enabled">
+                                    Enable push notifications
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="assignment-notifications" checked>
+                                <label class="form-check-label" for="assignment-notifications">
+                                    Assignment notifications
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="chat-notifications" checked>
+                                <label class="form-check-label" for="chat-notifications">
+                                    Chat message notifications
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="progress-notifications" checked>
+                                <label class="form-check-label" for="progress-notifications">
+                                    Progress milestone notifications
+                                </label>
+                            </div>
+                            
+                            <button class="btn btn-success mt-3" id="test-notification">
+                                <i class="fas fa-test-tube"></i> Send Test Notification
+                            </button>
+                        </div>
+                        
+                        <!-- Active Devices -->
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-devices"></i> Active Devices</h5>
+                            <div id="active-devices" class="list-group">
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span><i class="fas fa-spinner fa-spin"></i> Loading devices...</span>
+                                </div>
+                            </div>
+                            
+                            <h5 class="mt-4"><i class="fas fa-chart-bar"></i> Notification Statistics</h5>
+                            <div class="row text-center">
+                                <div class="col-4">
+                                    <div class="card bg-light">
+                                        <div class="card-body">
+                                            <h6>Today</h6>
+                                            <h4 id="notifications-today">0</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="card bg-light">
+                                        <div class="card-body">
+                                            <h6>This Week</h6>
+                                            <h4 id="notifications-week">0</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="card bg-light">
+                                        <div class="card-body">
+                                            <h6>Total</h6>
+                                            <h4 id="notifications-total">0</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Real-time Features -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h5><i class="fas fa-bolt"></i> Real-time Features</h5>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="card border-success">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-comments fa-2x text-success"></i>
+                                            <h6 class="mt-2">Real-time Chat</h6>
+                                            <div id="chat-status" class="badge bg-secondary">Checking...</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card border-info">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-tasks fa-2x text-info"></i>
+                                            <h6 class="mt-2">Live Progress</h6>
+                                            <div id="progress-status" class="badge bg-secondary">Checking...</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card border-warning">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-file-upload fa-2x text-warning"></i>
+                                            <h6 class="mt-2">File Sync</h6>
+                                            <div id="file-status" class="badge bg-secondary">Checking...</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card border-danger">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-bell fa-2x text-danger"></i>
+                                            <h6 class="mt-2">Push Notifications</h6>
+                                            <div id="notification-status" class="badge bg-secondary">Checking...</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Setup Instructions -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="accordion" id="setupAccordion">
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#setupInstructions">
+                                            <i class="fas fa-cogs"></i>&nbsp; Firebase Setup Instructions
+                                        </button>
+                                    </h2>
+                                    <div id="setupInstructions" class="accordion-collapse collapse" data-bs-parent="#setupAccordion">
+                                        <div class="accordion-body">
+                                            <h6>For Administrators:</h6>
+                                            <ol>
+                                                <li>Create a Firebase project at <a href="https://console.firebase.google.com" target="_blank">Firebase Console</a></li>
+                                                <li>Enable Authentication, Firestore, Cloud Messaging, and Storage</li>
+                                                <li>Generate a service account key and add it to your environment variables</li>
+                                                <li><strong>For bundlers/modern setups:</strong> Run <code>npm install firebase</code> and use modular imports instead of script tags</li>
+                                                <li>Configure the following environment variables in your <code>.env</code> file:</li>
+                                            </ol>
+                                            <pre class="bg-light p-3 rounded"><code>FIREBASE_API_KEY=your_api_key_here
+FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+FIREBASE_PROJECT_ID=your_project_id
+FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+FIREBASE_APP_ID=your_app_id
+FIREBASE_VAPID_KEY=your_vapid_key
+FIREBASE_SERVICE_ACCOUNT_KEY=/path/to/service-account-key.json
+ENABLE_FIREBASE_FEATURES=True</code></pre>
+                                            <div class="alert alert-info">
+                                                <strong>Note:</strong> Firebase integration is optional. The platform will work with Django Channels for real-time features if Firebase is not configured.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Check Firebase status
+    checkFirebaseStatus();
+    
+    // Load active devices
+    loadActiveDevices();
+    
+    // Test notification button
+    document.getElementById('test-notification').addEventListener('click', function() {
+        sendTestNotification();
+    });
+    
+    // Auto-refresh status every 30 seconds
+    setInterval(checkFirebaseStatus, 30000);
+});
+
+function checkFirebaseStatus() {
+    fetch('/api/firebase/config/')
+        .then(response => response.json())
+        .then(data => {
+            const statusDiv = document.getElementById('firebase-status');
+            const chatStatus = document.getElementById('chat-status');
+            const progressStatus = document.getElementById('progress-status');
+            const fileStatus = document.getElementById('file-status');
+            const notificationStatus = document.getElementById('notification-status');
+            
+            if (data.config && data.config.projectId) {
+                statusDiv.className = 'alert alert-success';
+                statusDiv.innerHTML = '<i class="fas fa-check-circle"></i> Firebase connected successfully';
+                
+                // Update feature statuses
+                chatStatus.className = 'badge bg-success';
+                chatStatus.textContent = 'Active';
+                progressStatus.className = 'badge bg-success';
+                progressStatus.textContent = 'Active';
+                fileStatus.className = 'badge bg-success';
+                fileStatus.textContent = 'Active';
+                notificationStatus.className = 'badge bg-success';
+                notificationStatus.textContent = 'Active';
+            } else {
+                statusDiv.className = 'alert alert-warning';
+                statusDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Firebase not configured - using Django fallback';
+                
+                // Update feature statuses
+                chatStatus.className = 'badge bg-warning';
+                chatStatus.textContent = 'Django Channels';
+                progressStatus.className = 'badge bg-warning';
+                progressStatus.textContent = 'Database Only';
+                fileStatus.className = 'badge bg-warning';
+                fileStatus.textContent = 'Local Storage';
+                notificationStatus.className = 'badge bg-danger';
+                notificationStatus.textContent = 'Disabled';
+            }
+        })
+        .catch(error => {
+            const statusDiv = document.getElementById('firebase-status');
+            statusDiv.className = 'alert alert-danger';
+            statusDiv.innerHTML = '<i class="fas fa-times-circle"></i> Error checking Firebase status';
+            console.error('Firebase status error:', error);
+        });
+}
+
+function loadActiveDevices() {
+    // Simulate device loading for now
+    const devicesDiv = document.getElementById('active-devices');
+    const devices = [
+        { name: 'Chrome Browser', lastSeen: 'Now', icon: 'fab fa-chrome' },
+        { name: 'Firefox Browser', lastSeen: '5 minutes ago', icon: 'fab fa-firefox' },
+        { name: 'Mobile Device', lastSeen: '1 hour ago', icon: 'fas fa-mobile-alt' }
+    ];
+    
+    devicesDiv.innerHTML = devices.map(device => `
+        <div class="list-group-item d-flex justify-content-between align-items-center">
+            <span><i class="${device.icon}"></i> ${device.name}</span>
+            <div>
+                <small class="text-muted">${device.lastSeen}</small>
+                <span class="badge bg-success rounded-pill ms-2">Active</span>
+            </div>
+        </div>
+    `).join('');
+}
+
+function sendTestNotification() {
+    const button = document.getElementById('test-notification');
+    const originalText = button.innerHTML;
+    
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+    
+    fetch('/api/firebase/test-notification/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('Test notification sent successfully!', 'success');
+        } else {
+            showAlert('Failed to send test notification: ' + (data.error || 'Unknown error'), 'danger');
+        }
+    })
+    .catch(error => {
+        showAlert('Error sending test notification', 'danger');
+        console.error('Test notification error:', error);
+    })
+    .finally(() => {
+        button.disabled = false;
+        button.innerHTML = originalText;
+    });
+}
+
+function showAlert(message, type) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.querySelector('.card-body').insertBefore(alertDiv, document.querySelector('.card-body').firstChild);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+</script>
+{% endblock %}

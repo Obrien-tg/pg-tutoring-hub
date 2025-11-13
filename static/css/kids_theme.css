@@ -1,0 +1,853 @@
+/* Kids-Friendly Theme for PG Tutoring Hub */
+/* Bright, engaging colors and playful elements for primary school students */
+
+:root {
+    --sunshine-yellow: #FFD700;
+    --ocean-blue: #4A90E2;
+    --forest-green: #50C878;
+    --coral-orange: #FF6B47;
+    --lavender-purple: #B19CD9;
+    --cloud-white: #FAFAFA;
+    --shadow-soft: 0 4px 12px rgba(0,0,0,0.1);
+    --border-radius-fun: 15px;
+}
+
+/* Typography - Friendly and readable */
+.kids-heading {
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    color: var(--ocean-blue);
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+}
+
+.kids-text {
+    font-family: 'Arial', sans-serif;
+    line-height: 1.6;
+    color: #333;
+}
+
+/* Buttons - Rounded and colorful */
+.btn-sunshine {
+    background: linear-gradient(135deg, var(--sunshine-yellow), #FFA500);
+    border: none;
+    border-radius: var(--border-radius-fun);
+    color: #333;
+    font-weight: bold;
+    padding: 12px 24px;
+    box-shadow: var(--shadow-soft);
+    transition: all 0.3s ease;
+}
+
+.btn-sunshine:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(255, 215, 0, 0.4);
+    color: #333;
+}
+
+.btn-ocean {
+    background: linear-gradient(135deg, var(--ocean-blue), #357ABD);
+    border: none;
+    border-radius: var(--border-radius-fun);
+    color: white;
+    font-weight: bold;
+    padding: 12px 24px;
+    box-shadow: var(--shadow-soft);
+    transition: all 0.3s ease;
+}
+
+.btn-ocean:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(74, 144, 226, 0.4);
+    color: white;
+}
+
+.btn-forest {
+    background: linear-gradient(135deg, var(--forest-green), #3A9B5C);
+    border: none;
+    border-radius: var(--border-radius-fun);
+    color: white;
+    font-weight: bold;
+    padding: 12px 24px;
+    box-shadow: var(--shadow-soft);
+    transition: all 0.3s ease;
+}
+
+.btn-forest:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(80, 200, 120, 0.4);
+    color: white;
+}
+
+.btn-coral {
+    background: linear-gradient(135deg, var(--coral-orange), #E55A3A);
+    border: none;
+    border-radius: var(--border-radius-fun);
+    color: white;
+    font-weight: bold;
+    padding: 12px 24px;
+    box-shadow: var(--shadow-soft);
+    transition: all 0.3s ease;
+}
+
+.btn-coral:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(255, 107, 71, 0.4);
+    color: white;
+}
+
+/* Cards - Fun and bouncy */
+.kids-card {
+    background: var(--cloud-white);
+    border-radius: var(--border-radius-fun);
+    border: 3px solid var(--ocean-blue);
+    box-shadow: var(--shadow-soft);
+    padding: 20px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.kids-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(74, 144, 226, 0.2);
+}
+
+.kids-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, var(--sunshine-yellow), var(--ocean-blue), var(--forest-green), var(--coral-orange));
+}
+
+/* Subject badges */
+.subject-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.9em;
+    font-weight: bold;
+    margin: 4px;
+    color: white;
+}
+
+.subject-math {
+    background: var(--ocean-blue);
+}
+
+.subject-english {
+    background: var(--forest-green);
+}
+
+.subject-science {
+    background: var(--coral-orange);
+}
+
+.subject-art {
+    background: var(--lavender-purple);
+}
+
+/* Progress bars - Colorful and animated */
+.kids-progress {
+    background: #E9ECEF;
+    border-radius: 10px;
+    height: 20px;
+    overflow: hidden;
+    position: relative;
+}
+
+.kids-progress-bar {
+    background: linear-gradient(90deg, var(--sunshine-yellow), var(--forest-green));
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.6s ease;
+    position: relative;
+}
+
+.kids-progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background-image: linear-gradient(
+        -45deg,
+        rgba(255, 255, 255, 0.2) 25%,
+        transparent 25%,
+        transparent 50%,
+        rgba(255, 255, 255, 0.2) 50%,
+        rgba(255, 255, 255, 0.2) 75%,
+        transparent 75%,
+        transparent
+    );
+    background-size: 30px 30px;
+    animation: progress-animation 2s linear infinite;
+}
+
+@keyframes progress-animation {
+    0% {
+        background-position: 0 0;
+    }
+    100% {
+        background-position: 30px 0;
+    }
+}
+
+/* Fun icons and decorations */
+.icon-fun {
+    font-size: 1.5em;
+    margin-right: 8px;
+    color: var(--ocean-blue);
+}
+
+.star-rating {
+    color: var(--sunshine-yellow);
+    font-size: 1.2em;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+}
+
+/* Dashboard widgets */
+.dashboard-widget {
+    background: linear-gradient(135deg, #fff, #f8f9fa);
+    border-radius: var(--border-radius-fun);
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 2px solid var(--ocean-blue);
+    box-shadow: var(--shadow-soft);
+    transition: all 0.3s ease;
+}
+
+.dashboard-widget:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+/* Sidebar - Colorful navigation */
+.kids-sidebar {
+    background: linear-gradient(180deg, var(--ocean-blue), var(--lavender-purple));
+    border-radius: 0 var(--border-radius-fun) var(--border-radius-fun) 0;
+}
+
+.kids-sidebar .nav-link {
+    color: white !important;
+    border-radius: var(--border-radius-fun);
+    margin: 5px 10px;
+    padding: 15px 20px;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.kids-sidebar .nav-link:hover,
+.kids-sidebar .nav-link.active {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: var(--sunshine-yellow);
+    transform: translateX(5px);
+}
+
+/* Alerts - Friendly notifications */
+.alert-kids-success {
+    background: linear-gradient(135deg, var(--forest-green), #4CAF50);
+    border: none;
+    border-radius: var(--border-radius-fun);
+    color: white;
+    border-left: 5px solid var(--sunshine-yellow);
+}
+
+.alert-kids-info {
+    background: linear-gradient(135deg, var(--ocean-blue), #2196F3);
+    border: none;
+    border-radius: var(--border-radius-fun);
+    color: white;
+    border-left: 5px solid var(--sunshine-yellow);
+}
+
+.alert-kids-warning {
+    background: linear-gradient(135deg, var(--sunshine-yellow), #FFC107);
+    border: none;
+    border-radius: var(--border-radius-fun);
+    color: #333;
+    border-left: 5px solid var(--coral-orange);
+}
+
+/* Form inputs - Rounded and friendly */
+.form-control-kids {
+    border-radius: var(--border-radius-fun);
+    border: 2px solid var(--ocean-blue);
+    padding: 12px 15px;
+    transition: all 0.3s ease;
+}
+
+.form-control-kids:focus {
+    border-color: var(--sunshine-yellow);
+    box-shadow: 0 0 0 0.2rem rgba(255, 215, 0, 0.25);
+}
+
+/* Animation for page loads */
+.fade-in {
+    animation: fadeIn 0.6s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .kids-card {
+        margin-bottom: 15px;
+    }
+    
+    .btn-sunshine,
+    .btn-ocean,
+    .btn-forest,
+    .btn-coral {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    
+    .dashboard-widget {
+        padding: 15px;
+    }
+    
+    .kids-sidebar {
+        border-radius: 0;
+    }
+}
+
+/* Fun hover effects for materials */
+.material-item {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.material-item:hover {
+    transform: scale(1.02);
+}
+
+/* Breadcrumbs - Trail of learning */
+.breadcrumb-kids {
+    background: linear-gradient(90deg, var(--sunshine-yellow), var(--ocean-blue));
+    border-radius: var(--border-radius-fun);
+    padding: 10px 20px;
+}
+
+.breadcrumb-kids .breadcrumb-item {
+    color: white;
+    font-weight: bold;
+}
+
+.breadcrumb-kids .breadcrumb-item.active {
+    color: var(--cloud-white);
+}
+
+/* ==========================================
+   ENHANCED MOBILE RESPONSIVENESS
+   ========================================== */
+
+/* Large screens (desktops, 1200px and up) */
+@media (min-width: 1200px) {
+    .kids-card .card-body {
+        padding: 2.5rem;
+    }
+    
+    .btn-lg {
+        padding: 20px 40px;
+        font-size: 1.2rem;
+    }
+    
+    .page-title {
+        font-size: 3.5rem;
+    }
+}
+
+/* Medium-large screens (desktops, 992px and up) */
+@media (min-width: 992px) and (max-width: 1199.98px) {
+    .page-title {
+        font-size: 3rem;
+    }
+    
+    .kids-card .card-body {
+        padding: 2rem;
+    }
+}
+
+/* Medium screens (tablets, 768px to 991px) */
+@media (min-width: 768px) and (max-width: 991.98px) {
+    .page-title {
+        font-size: 2.5rem;
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+    
+    .kids-card .card-body {
+        padding: 1.75rem;
+    }
+    
+    .btn {
+        width: 100%;
+        margin-bottom: 12px;
+    }
+    
+    .btn:last-child {
+        margin-bottom: 0;
+    }
+    
+    /* Better tablet navigation */
+    .navbar-collapse {
+        background: rgba(255, 255, 255, 0.98);
+        margin-top: 1rem;
+        padding: 1.5rem;
+        border-radius: var(--border-radius-fun);
+        box-shadow: var(--shadow-soft);
+    }
+    
+    /* Stack assignment cards better on tablets */
+    .assignment-card {
+        margin-bottom: 1.5rem;
+    }
+    
+    /* Progress bars more prominent on tablets */
+    .progress {
+        height: 24px;
+    }
+}
+
+/* Small screens (landscape phones, 576px to 767px) */
+@media (min-width: 576px) and (max-width: 767.98px) {
+    .page-title {
+        font-size: 2rem;
+        text-align: center;
+        margin-bottom: 1.25rem;
+        line-height: 1.2;
+    }
+    
+    .kids-card {
+        margin-bottom: 1.25rem;
+    }
+    
+    .kids-card .card-header {
+        padding: 1.25rem;
+        text-align: center;
+    }
+    
+    .kids-card .card-body {
+        padding: 1.25rem;
+    }
+    
+    .btn {
+        padding: 16px 24px;
+        font-size: 1.05rem;
+        width: 100%;
+        margin-bottom: 12px;
+    }
+    
+    .btn-lg {
+        padding: 18px 28px;
+        font-size: 1.15rem;
+    }
+    
+    .btn-sm {
+        padding: 12px 18px;
+        font-size: 0.95rem;
+    }
+    
+    /* Stack columns on landscape phones */
+    .row.mobile-stack > .col-md-6,
+    .row.mobile-stack > .col-lg-4,
+    .row.mobile-stack > .col-lg-6 {
+        margin-bottom: 1.25rem;
+    }
+    
+    /* Larger touch targets */
+    .nav-link {
+        padding: 14px 22px !important;
+        font-size: 1.1rem;
+        text-align: center;
+    }
+    
+    /* Better form spacing */
+    .form-control {
+        padding: 18px;
+        font-size: 1.1rem;
+    }
+    
+    .form-label {
+        font-size: 1.1rem;
+        margin-bottom: 10px;
+    }
+    
+    /* Progress tracking cards */
+    .progress-item {
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .subject-badge {
+        width: 45px;
+        height: 45px;
+        font-size: 0.85rem;
+    }
+}
+
+/* Extra small screens (portrait phones, less than 576px) */
+@media (max-width: 575.98px) {
+    /* Container adjustments */
+    .container-fluid {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+    
+    /* Typography scaling */
+    .page-title {
+        font-size: 1.75rem;
+        line-height: 1.1;
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+    
+    .section-title {
+        font-size: 1.4rem;
+        margin-bottom: 1.25rem;
+    }
+    
+    /* Card adjustments */
+    .kids-card {
+        margin-bottom: 1rem;
+        border-radius: 12px;
+    }
+    
+    .kids-card .card-header {
+        padding: 1rem;
+        text-align: center;
+    }
+    
+    .kids-card .card-header h1,
+    .kids-card .card-header h2,
+    .kids-card .card-header h3,
+    .kids-card .card-header h4,
+    .kids-card .card-header h5 {
+        font-size: 1.1rem;
+        margin-bottom: 0;
+        line-height: 1.2;
+    }
+    
+    .kids-card .card-body {
+        padding: 1rem;
+    }
+    
+    /* Button optimizations */
+    .btn {
+        padding: 16px 20px;
+        font-size: 1rem;
+        width: 100%;
+        margin-bottom: 10px;
+        border-radius: 12px;
+    }
+    
+    .btn-lg {
+        padding: 18px 24px;
+        font-size: 1.1rem;
+    }
+    
+    .btn-sm {
+        padding: 12px 16px;
+        font-size: 0.9rem;
+    }
+    
+    /* Navigation mobile-first */
+    .navbar {
+        padding: 0.75rem 0;
+    }
+    
+    .navbar-brand {
+        font-size: 1.3rem;
+    }
+    
+    .navbar-collapse {
+        background: white;
+        margin-top: 1rem;
+        padding: 1rem;
+        border-radius: 12px;
+        box-shadow: var(--shadow-soft);
+        border: 1px solid #e9ecef;
+    }
+    
+    .nav-link {
+        padding: 16px 20px !important;
+        font-size: 1.1rem;
+        text-align: center;
+        margin: 4px 0;
+        border-radius: 10px;
+        background: rgba(74, 144, 226, 0.05);
+    }
+    
+    .nav-link:hover {
+        background: rgba(74, 144, 226, 0.15);
+    }
+    
+    /* Form optimizations for mobile */
+    .form-control {
+        padding: 18px 16px;
+        font-size: 1.1rem;
+        border-radius: 12px;
+    }
+    
+    .form-label {
+        font-size: 1.1rem;
+        margin-bottom: 8px;
+    }
+    
+    /* Progress and statistics */
+    .progress {
+        height: 18px;
+        border-radius: 12px;
+    }
+    
+    .progress-item {
+        padding: 1rem;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+    }
+    
+    .subject-badge {
+        width: 35px;
+        height: 35px;
+        font-size: 0.7rem;
+    }
+    
+    .badge {
+        font-size: 0.75rem;
+        padding: 6px 10px;
+        border-radius: 8px;
+    }
+    
+    /* Assignment cards mobile optimization */
+    .assignment-card .card-header h5 {
+        font-size: 1rem;
+        line-height: 1.2;
+    }
+    
+    .assignment-stats {
+        padding: 0.75rem;
+    }
+    
+    .assignment-stats .stat-value {
+        font-size: 1rem;
+    }
+    
+    .assignment-stats .stat-label {
+        font-size: 0.7rem;
+    }
+    
+    /* Hide non-essential elements on very small screens */
+    .d-none-xs {
+        display: none !important;
+    }
+    
+    /* Simplify complex layouts */
+    .d-flex.justify-content-between {
+        flex-direction: column;
+        align-items: stretch !important;
+    }
+    
+    .d-flex.justify-content-between > * {
+        margin-bottom: 0.5rem;
+    }
+    
+    .d-flex.justify-content-between > *:last-child {
+        margin-bottom: 0;
+    }
+    
+    /* Alert adjustments */
+    .alert {
+        padding: 1rem;
+        border-radius: 12px;
+        font-size: 0.95rem;
+    }
+    
+    /* Table responsiveness */
+    .table-responsive {
+        border-radius: 12px;
+    }
+    
+    /* Chat optimizations */
+    .chat-container {
+        height: 300px;
+        padding: 1rem;
+        border-radius: 12px;
+    }
+    
+    .message-bubble {
+        max-width: 85%;
+        padding: 0.75rem 1rem;
+        border-radius: 15px;
+        font-size: 0.95rem;
+    }
+}
+
+/* Ultra small screens (very small phones, less than 400px) */
+@media (max-width: 399.98px) {
+    .page-title {
+        font-size: 1.5rem;
+    }
+    
+    .kids-card .card-body {
+        padding: 0.75rem;
+    }
+    
+    .btn {
+        padding: 14px 16px;
+        font-size: 0.95rem;
+    }
+    
+    .form-control {
+        padding: 16px 14px;
+        font-size: 1rem;
+    }
+    
+    .progress-item {
+        padding: 0.75rem;
+    }
+    
+    .subject-badge {
+        width: 30px;
+        height: 30px;
+        font-size: 0.6rem;
+    }
+}
+
+/* ==========================================
+   TOUCH AND INTERACTION IMPROVEMENTS
+   ========================================== */
+
+/* Better touch targets for mobile */
+@media (max-width: 767.98px) {
+    .btn,
+    .nav-link,
+    .form-control,
+    .list-group-item-action {
+        min-height: 44px; /* Apple's recommended minimum touch target */
+    }
+    
+    /* Increase spacing between interactive elements */
+    .btn + .btn,
+    .nav-link + .nav-link {
+        margin-top: 8px;
+    }
+    
+    /* Larger checkboxes and radio buttons */
+    input[type="checkbox"],
+    input[type="radio"] {
+        width: 20px;
+        height: 20px;
+    }
+    
+    /* Better hover states for touch devices */
+    .kids-card:hover {
+        transform: none; /* Disable hover transforms on touch devices */
+    }
+    
+    .btn:hover {
+        transform: none; /* Disable button hover transforms on touch devices */
+    }
+}
+
+/* ==========================================
+   ACCESSIBILITY IMPROVEMENTS
+   ========================================== */
+
+/* Focus indicators for keyboard navigation */
+.btn:focus,
+.form-control:focus,
+.nav-link:focus {
+    outline: 3px solid var(--sunshine-yellow);
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .kids-card {
+        border: 2px solid #000;
+    }
+    
+    .btn {
+        border: 2px solid #000;
+    }
+    
+    .progress {
+        border: 1px solid #000;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    .kids-card:hover,
+    .btn:hover {
+        transform: none !important;
+    }
+}
+
+/* ==========================================
+   UTILITY CLASSES FOR MOBILE
+   ========================================== */
+
+.mobile-center {
+    text-align: center !important;
+}
+
+.mobile-stack {
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.mobile-full-width {
+    width: 100% !important;
+}
+
+.mobile-no-margin {
+    margin: 0 !important;
+}
+
+.mobile-small-text {
+    font-size: 0.9rem !important;
+}
+
+.mobile-large-text {
+    font-size: 1.2rem !important;
+}
+
+/* Show/hide elements based on screen size */
+@media (max-width: 767.98px) {
+    .hide-mobile {
+        display: none !important;
+    }
+    
+    .show-mobile {
+        display: block !important;
+    }
+}
+
+@media (min-width: 768px) {
+    .hide-desktop {
+        display: none !important;
+    }
+    
+    .show-desktop {
+        display: block !important;
+    }
+    
+    .show-mobile {
+        display: none !important;
+    }
+}
