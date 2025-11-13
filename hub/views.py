@@ -9,6 +9,7 @@ from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 
 from .models import Assignment, AssignmentSubmission, Material, StudentProgress
+from users.firebase_utils import send_submission_notification
 
 
 def materials_list(request):
@@ -131,7 +132,7 @@ def submit_assignment(request, assignment_id):
         or request.user not in assignment.assigned_to.all()
     ):
         messages.error(request, "You are not authorized to submit this assignment.")
-        return redirect("assignments_list")
+        return redirect("hub:assignments_list")
 
     # Check if already submitted
     existing_submission = AssignmentSubmission.objects.filter(
@@ -163,6 +164,7 @@ def submit_assignment(request, assignment_id):
                     existing_submission.submission_file = submission_file
                 existing_submission.status = "submitted"
                 existing_submission.save()
+                send_submission_notification(existing_submission)
                 messages.success(
                     request, "Your assignment has been updated successfully!"
                 )
@@ -176,11 +178,14 @@ def submit_assignment(request, assignment_id):
                     submission_file=submission_file,
                     status="submitted",
                 )
+                send_submission_notification(submission)
                 messages.success(
                     request, "Your assignment has been submitted successfully!"
                 )
+                # Send notification
+                send_submission_notification(request.user, assignment)
 
-            return redirect("assignments_list")
+            return redirect("hub:assignments_list")
 
         except Exception as e:
             messages.error(request, f"Error submitting assignment: {str(e)}")

@@ -46,12 +46,12 @@
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb breadcrumb-kids">
                 <li class="breadcrumb-item">
-                    <a href="{% url 'hub:materials' %}" class="text-white">
+                    <a href="{% url 'hub:materials_list' %}" class="text-white">
                         <i class="fas fa-home icon-fun"></i>Hub
                     </a>
                 </li>
                 <li class="breadcrumb-item">
-                    <a href="{% url 'hub:assignments' %}" class="text-white">
+                    <a href="{% url 'hub:assignments_list' %}" class="text-white">
                         <i class="fas fa-tasks icon-fun"></i>Assignments
                     </a>
                 </li>
@@ -160,7 +160,7 @@
                         <i class="fas fa-paper-plane"></i> Submit My Work!
                     </button>
                     <div class="mt-3">
-                        <a href="{% url 'hub:assignments' %}" class="btn btn-outline-secondary">
+                        <a href="{% url 'hub:assignments_list' %}" class="btn btn-outline-secondary">
                             <i class="fas fa-arrow-left"></i> Back to Assignments
                         </a>
                     </div>
