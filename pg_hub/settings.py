@@ -121,22 +121,38 @@ else:
     # Check for DATABASE_URL (Render, Heroku, etc.)
     DATABASE_URL = config("DATABASE_URL", default="")
     if DATABASE_URL:
-        import dj_database_url
-        DATABASES = {
-            "default": dj_database_url.config(
-                default=DATABASE_URL,
-                conn_max_age=600,
-                conn_health_checks=True,
-            )
-        }
+        try:
+            import dj_database_url
+            DATABASES = {
+                "default": dj_database_url.config(
+                    default=DATABASE_URL,
+                    conn_max_age=600,
+                    conn_health_checks=True,
+                )
+            }
+            print(f"✅ Database configured from DATABASE_URL: {DATABASE_URL[:20]}...")
+        except Exception as e:
+            print(f"❌ Error parsing DATABASE_URL: {e}")
+            # Fallback to individual settings
+            DATABASES = {
+                "default": {
+                    "ENGINE": "django.db.backends.postgresql",
+                    "NAME": config("POSTGRES_DB", default="pg_tutoring"),
+                    "USER": config("POSTGRES_USER", default="pguser"),
+                    "PASSWORD": config("POSTGRES_PASSWORD", default="pgpass123"),
+                    "HOST": config("POSTGRES_HOST", default="localhost"),
+                    "PORT": config("POSTGRES_PORT", default="5432"),
+                }
+            }
     else:
+        print("⚠️  No DATABASE_URL found, using individual settings")
         DATABASES = {
             "default": {
                 "ENGINE": "django.db.backends.postgresql",
                 "NAME": config("POSTGRES_DB", default="pg_tutoring"),
                 "USER": config("POSTGRES_USER", default="pguser"),
                 "PASSWORD": config("POSTGRES_PASSWORD", default="pgpass123"),
-                "HOST": config("POSTGRES_HOST", default="db"),
+                "HOST": config("POSTGRES_HOST", default="localhost"),
                 "PORT": config("POSTGRES_PORT", default="5432"),
             }
         }
