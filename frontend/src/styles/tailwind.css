@@ -2,20 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  :root {
-    --primary: #A8E6CF;
-    --primary-light: #D5F5E8;
-    --primary-dark: #7DD9BB;
-    --secondary: #FFD3B6;
-    --accent: #FFAAA5;
-    --text-primary: #243B4A;
-    --text-secondary: #5A6F7D;
-    --border: #E8D5C8;
-    --surface: #FFFFFF;
-  }
-}
-
 @layer components {
   .btn-primary {
     @apply bg-primary text-white font-medium rounded-md px-6 py-3;
