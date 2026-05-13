@@ -1,14 +1,19 @@
 {% load static %}
 
-<div class="d-flex align-items-center gap-3 p-3 surface-card">
-  <img src="{% static 'images/tutors/patience-gwanyanya.jpg' %}"
-       alt="Patience Gwanyanya - Lead Tutor"
-       class="rounded-circle"
-       style="width: 64px; height: 64px; object-fit: cover; border: 0.5px solid var(--border);">
+<div
+  class="flex items-center gap-3 p-3 bg-card border border-border-light rounded-lg"
+>
+  <img
+    src="{% static 'images/tutors/patience-gwanyanya.jpg' %}"
+    alt="Patience Gwanyanya - Lead Tutor"
+    class="rounded-full w-16 h-16 object-cover border border-border"
+  />
 
   <div>
-    <div class="eyebrow mb-1">Lead tutor</div>
-    <h5 class="mb-1" style="font-size: 16px; font-weight: 500;">Patience Gwanyanya</h5>
-    <p class="mb-0" style="font-size: 14px; color: var(--text-secondary);">Founder · primary education</p>
+    <div class="text-xs text-text-secondary uppercase tracking-wide mb-1">
+      Lead tutor
+    </div>
+    <h5 class="text-sm font-medium mb-1">Patience Gwanyanya</h5>
+    <p class="text-sm text-text-secondary mb-0">Founder · primary education</p>
   </div>
 </div>
