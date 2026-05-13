@@ -147,19 +147,19 @@ pg_tutoring_hub/
 
 ### Colors
 
-- Primary: #667eea (Blue)
-- Secondary: #764ba2 (Purple)
-- Accent: #fcb69f (Peach)
-- Success: #28a745
-- Warning: #ffc107
-- Danger: #dc3545
+- Primary: #7fcdbb (Mint)
+- Secondary: #ffbea9 (Peach)
+- Accent: #ff9f9d (Coral)
+- Background: #fffdf8 (Warm cream)
+- Surface: #ffffff
+- Text: #243b4a (Deep slate)
 
 ### Components
 
-- Gradient buttons and backgrounds
-- Card-based layouts
+- Soft gradient accents
+- Rounded card-based layouts
 - Responsive design
-- Smooth animations
+- Gentle motion and friendly spacing
 - Bootstrap 5 components
 
 ## 🔧 Development Guidelines

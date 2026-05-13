@@ -77,6 +77,8 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    # Clerk JWT middleware validates Bearer tokens and attaches a user when present
+    "users.clerk_middleware.ClerkAuthMiddleware",
     # django-axes middleware monitors login attempts
     "axes.middleware.AxesMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
@@ -206,6 +208,11 @@ if not DEBUG:
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Clerk (third-party auth) settings
+CLERK_JWKS_URL = config("CLERK_JWKS_URL", default="https://api.clerk.dev/v1/.well-known/jwks.json")
+CLERK_AUDIENCE = config("CLERK_AUDIENCE", default="")
+CLERK_JWKS_CACHE_TTL = config("CLERK_JWKS_CACHE_TTL", default=3600, cast=int)
 
 # Custom User Model
 AUTH_USER_MODEL = "users.CustomUser"
