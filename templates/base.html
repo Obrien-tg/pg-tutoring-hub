@@ -23,164 +23,80 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <!-- Custom CSS -->
     <link href="{% static 'css/main.css' %}" rel="stylesheet">
-    <!-- Kids-Friendly Theme -->
+    <!-- Legacy utility classes used by existing pages -->
     <link href="{% static 'css/kids_theme.css' %}" rel="stylesheet">
-    
-    {% block extra_css %}{% endblock %}
-    
+
     <style>
-        :root {
-            --primary-color: #667eea;
-            --secondary-color: #764ba2;
-            --success-color: #28a745;
-            --info-color: #17a2b8;
-            --warning-color: #ffc107;
-            --danger-color: #dc3545;
+        .kids-card,
+        .kids-sidebar,
+        .dashboard-widget,
+        .bg-gradient-success,
+        .bg-gradient-warning,
+        .bg-gradient-info,
+        .bg-gradient-primary {
+            background: linear-gradient(180deg, rgba(255, 243, 235, 0.96), rgba(255, 255, 255, 0.98)) !important;
+            border: 0.5px solid var(--border) !important;
+            box-shadow: none !important;
+            color: var(--text-primary) !important;
         }
-        
-        .navbar-brand {
-            font-weight: bold;
-        }
-        
-        .main-content {
-            margin-top: 80px;
-            min-height: calc(100vh - 160px);
-        }
-        
-        .sidebar {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            min-height: calc(100vh - 56px);
-            color: white;
-        }
-        
-        .sidebar .nav-link {
-            color: rgba(255,255,255,0.8);
-            padding: 15px 20px;
-            border-radius: 8px;
-            margin: 5px 10px;
-            transition: all 0.3s;
-        }
-        
-        .sidebar .nav-link:hover,
-        .sidebar .nav-link.active {
-            background: rgba(255,215,0,0.2);
-            color: #FFD700;
-            border-left: 4px solid #FFD700;
-            transform: translateX(5px);
-        }
-        
-        .card {
-            border: none;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: transform 0.3s;
-        }
-        
-        .card:hover {
-            transform: translateY(-2px);
-        }
-        
+
+        .btn-sunshine,
+        .btn-ocean,
+        .btn-forest,
+        .btn-coral,
         .btn-gradient {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            border: none;
-            color: white;
+            background: linear-gradient(90deg, var(--accent), var(--accent-secondary)) !important;
+            border: 0.5px solid transparent !important;
+            color: #ffffff !important;
+            box-shadow: none !important;
         }
-        
+
+        .btn-sunshine:hover,
+        .btn-ocean:hover,
+        .btn-forest:hover,
+        .btn-coral:hover,
         .btn-gradient:hover {
-            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
-            color: white;
+            background: linear-gradient(90deg, #6ac2ae, var(--accent-secondary)) !important;
+            color: #ffffff !important;
         }
-        
-        .alert {
-            border: none;
-            border-radius: 10px;
+
+        .alert-kids-success,
+        .alert-kids-info,
+        .alert-kids-warning {
+            background: rgba(255, 255, 255, 0.95) !important;
+            color: var(--text-primary) !important;
+            border: 0.5px solid var(--border) !important;
         }
-        
-        /* Loading States */
-        .loading-spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            border-top-color: #FFD700;
-            animation: spin 1s ease-in-out infinite;
+
+        .kids-sidebar .nav-link,
+        .kids-sidebar .nav-link:hover,
+        .kids-sidebar .nav-link.active {
+            color: var(--text-secondary) !important;
+            background: rgba(255, 255, 255, 0.6) !important;
+            border-color: var(--border) !important;
+            transform: none !important;
         }
-        
-        .btn-loading {
-            position: relative;
-            color: transparent !important;
+
+        .kids-progress,
+        .kids-progress-bar {
+            background: rgba(127, 205, 187, 0.15) !important;
         }
-        
-        .btn-loading::after {
-            content: "";
-            position: absolute;
-            width: 16px;
-            height: 16px;
-            top: 50%;
-            left: 50%;
-            margin-left: -8px;
-            margin-top: -8px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            border-top-color: #FFD700;
-            animation: spin 1s ease-in-out infinite;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        /* Page transitions */
-        .page-transition {
-            opacity: 0;
-            animation: fadeInUp 0.6s ease-out forwards;
-        }
-        
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        /* Enhanced focus states for accessibility */
-        .sidebar .nav-link:focus {
-            outline: 2px solid #FFD700;
-            outline-offset: 2px;
-        }
-        
-        /* Subtle pulse animation for important elements */
-        .pulse-gentle {
-            animation: pulseGentle 2s infinite;
-        }
-        
-        @keyframes pulseGentle {
-            0%, 100% {
-                opacity: 1;
-            }
-            50% {
-                opacity: 0.8;
-            }
-        }
-        
-        .footer {
-            background: #343a40;
-            color: white;
-            padding: 20px 0;
-            margin-top: auto;
+
+        .kids-card::before,
+        .kids-progress-bar::after {
+            display: none !important;
         }
     </style>
+
+    {% block extra_css %}{% endblock %}
+
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top shadow-lg">
+    <nav class="navbar navbar-expand-lg fixed-top site-navbar">
         <div class="container-fluid">
-            <a class="navbar-brand fw-bold text-warning" href="{% url 'core:home' %}">
-                <i class="fas fa-graduation-cap me-2"></i> PG Tutoring
+            <a class="navbar-brand" href="{% url 'core:home' %}">
+                <i class="fas fa-graduation-cap me-2"></i> PG Tutoring Hub
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -211,9 +127,9 @@
                 <ul class="navbar-nav">
                     {% if user.is_authenticated %}
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle fw-semibold" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
                                 <i class="fas fa-user-circle me-1"></i> {{ user.first_name|default:user.username }}
-                                <span class="badge bg-warning text-dark ms-1">{{ user.get_user_type_display }}</span>
+                                <span class="badge-user-type ms-1">{{ user.get_user_type_display }}</span>
                             </a>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="{% url 'users:dashboard' %}">
@@ -230,11 +146,11 @@
                         </li>
                     {% else %}
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle btn btn-outline-light me-2" href="#" id="authDropdown" role="button" data-bs-toggle="dropdown">
+                            <a class="nav-link dropdown-toggle me-2" href="#" id="authDropdown" role="button" data-bs-toggle="dropdown">
                                 <i class="fas fa-user-plus"></i> Get Started
                             </a>
                             <ul class="dropdown-menu">
-                                <li><h6 class="dropdown-header">New to PG Tutoring?</h6></li>
+                                <li><h6 class="dropdown-header">Choose your learning path</h6></li>
                                 <li><a class="dropdown-item" href="{% url 'users:register' %}?role=student">
                                     <i class="fas fa-graduation-cap text-primary"></i> Register as Student
                                 </a></li>
@@ -252,7 +168,7 @@
                             </ul>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link btn btn-primary text-white ms-2" href="{% url 'users:login' %}">
+                            <a class="nav-link btn btn-primary ms-2" href="{% url 'users:login' %}">
                                 <i class="fas fa-sign-in-alt"></i> Login
                             </a>
                         </li>
@@ -263,7 +179,7 @@
     </nav>
 
     <!-- Main Content -->
-    <div class="main-content page-transition">
+    <main class="main-content page-transition">
         <!-- Messages -->
         {% if messages %}
             <div class="container">
@@ -277,18 +193,18 @@
         {% endif %}
 
         {% block content %}{% endblock %}
-    </div>
+    </main>
 
     <!-- Footer -->
-    <footer class="footer mt-auto">
+    <footer class="site-footer mt-auto">
         <div class="container">
             <div class="row">
                 <div class="col-md-6">
                     <h6><i class="fas fa-graduation-cap"></i> PG Tutoring</h6>
-                    <p class="mb-0">Bringing quality education to the digital age.</p>
+                    <p class="mb-0">A warm, playful space for focused learning.</p>
                 </div>
                 <div class="col-md-6 text-md-end">
-                    <p class="mb-0">&copy; 2025 PG Tutoring. Built with ❤️ for Patience Gwanyanya</p>
+                    <p class="mb-0">&copy; 2026 PG Tutoring. Built with care for Patience Gwanyanya</p>
                 </div>
             </div>
         </div>
