@@ -42,7 +42,7 @@ html {
 }
 
 body {
-    font-family: 'Trebuchet MS', 'Verdana', 'Segoe UI', sans-serif;
+    font-family: 'Poppins', 'Trebuchet MS', 'Verdana', 'Segoe UI', sans-serif;
     line-height: 1.6;
     color: var(--text-primary);
     background: var(--bg-primary);
@@ -102,9 +102,20 @@ a:hover {
 .meta,
 .badge-user-type,
 .tag,
-.command-line,
-.small-meta {
-    font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+.small-meta,
+.btn,
+.btn-primary,
+.btn-outline-primary,
+.btn-light,
+.btn-outline-light,
+.btn-secondary,
+.btn-ghost,
+.btn-gradient,
+.btn-sunshine,
+.btn-ocean,
+.btn-forest,
+.btn-coral {
+    font-family: 'Poppins', 'Trebuchet MS', 'Verdana', 'Segoe UI', sans-serif;
 }
 
 .navbar-brand {
