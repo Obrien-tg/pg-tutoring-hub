@@ -2,12 +2,62 @@
 
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize all components
+    initializeSplashScreen();
     initializeAnimations();
     initializeFormValidation();
     initializeTooltips();
     initializeCharts();
     initializeNotifications();
 });
+
+function initializeSplashScreen() {
+    const splash = document.getElementById('page-splash');
+    if (!splash) {
+        return;
+    }
+
+    let splashSeen = false;
+    try {
+        splashSeen = sessionStorage.getItem('pgTutoringSplashSeen') === 'true';
+    } catch (error) {
+        splashSeen = false;
+    }
+
+    const hideSplash = () => {
+        splash.classList.add('is-hidden');
+        document.documentElement.classList.add('splash-seen');
+
+        try {
+            sessionStorage.setItem('pgTutoringSplashSeen', 'true');
+        } catch (error) {
+            // Ignore storage errors and continue.
+        }
+
+        setTimeout(() => {
+            if (splash.parentNode) {
+                splash.parentNode.removeChild(splash);
+            }
+        }, 500);
+    };
+
+    if (splashSeen) {
+        hideSplash();
+        return;
+    }
+
+    const scheduleHide = () => {
+        window.setTimeout(hideSplash, 700);
+    };
+
+    if (document.readyState === 'complete') {
+        scheduleHide();
+        return;
+    }
+
+    window.addEventListener('load', () => {
+        scheduleHide();
+    }, { once: true });
+}
 
 // Animation Utilities
 function initializeAnimations() {
