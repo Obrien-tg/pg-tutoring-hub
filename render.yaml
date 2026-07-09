@@ -5,12 +5,8 @@ services:
     plan: starter
     buildCommand: docker build -t pg-tutoring-hub .
     startCommand: |
-      docker run -p $PORT:8000 -e DATABASE_URL=$DATABASE_URL pg-tutoring-hub sh -c "
-        python manage.py migrate --no-input &&
-        python manage.py setup_demo &&
-        python manage.py collectstatic --no-input &&
-        gunicorn pg_hub.wsgi:application --bind 0.0.0.0:8000
-      "
+      python manage.py migrate --no-input &&
+      gunicorn pg_hub.wsgi:application --bind 0.0.0.0:8000
     envVars:
       - key: DEBUG
         value: false
@@ -25,6 +21,8 @@ services:
           type: redis
           plan: starter
           name: pg-tutoring-redis
+      - key: SECURE_PROXY_SSL_HEADER
+        value: "1"
       - key: ALLOWED_HOSTS
         fromService:
           type: web

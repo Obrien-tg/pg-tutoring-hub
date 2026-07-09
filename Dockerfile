@@ -31,8 +31,9 @@ COPY --from=builder /root/.local /root/.local
 # Copy app
 COPY . .
 
-# Make sure scripts are executable
-RUN chmod +x manage.py
+# Switch to the Django project package so manage.py and gunicorn
+# resolve the backend modules without extra PYTHONPATH setup.
+WORKDIR /app/backend
 
 # Collect static files
 RUN python manage.py collectstatic --no-input
