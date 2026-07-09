@@ -26,6 +26,16 @@
 
     <title>{% block title %}PG Tutoring{% endblock %}</title>
 
+    <script>
+      try {
+        if (sessionStorage.getItem('pgTutoringSplashSeen') === 'true') {
+          document.documentElement.classList.add('splash-seen');
+        }
+      } catch (error) {
+        // Ignore storage errors and fall back to the default splash behavior.
+      }
+    </script>
+
     <!-- Friendly reading font for the warm learning layout -->
     <link
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
@@ -126,6 +136,70 @@
     {% block extra_css %}{% endblock %}
   </head>
   <body>
+    <div id="page-splash" class="page-splash" aria-hidden="true">
+      <div class="page-splash-card">
+        <div class="page-splash-mark">
+          <i class="fas fa-graduation-cap"></i>
+        </div>
+        <p class="page-splash-eyebrow">PG Tutoring Hub</p>
+        <h1>Learning made gentle.</h1>
+        <p class="page-splash-copy">
+          Patience Gwanyanya's warm learning space is loading.
+        </p>
+        <div class="page-splash-loader" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </div>
+        <p class="page-splash-signature">TM Made by Obrien-tg</p>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        const splash = document.getElementById('page-splash');
+        if (!splash) {
+          return;
+        }
+
+        let splashSeen = false;
+        try {
+          splashSeen = sessionStorage.getItem('pgTutoringSplashSeen') === 'true';
+        } catch (error) {
+          splashSeen = false;
+        }
+
+        const hideSplash = function () {
+          splash.classList.add('is-hidden');
+          document.documentElement.classList.add('splash-seen');
+
+          try {
+            sessionStorage.setItem('pgTutoringSplashSeen', 'true');
+          } catch (error) {
+            // Ignore storage errors and continue.
+          }
+
+          window.setTimeout(function () {
+            if (splash.parentNode) {
+              splash.parentNode.removeChild(splash);
+            }
+          }, 500);
+        };
+
+        if (splashSeen) {
+          hideSplash();
+          return;
+        }
+
+        if (document.readyState === 'complete') {
+          window.setTimeout(hideSplash, 700);
+          return;
+        }
+
+        window.addEventListener('load', function () {
+          window.setTimeout(hideSplash, 700);
+        }, { once: true });
+      })();
+    </script>
+
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg fixed-top site-navbar">
       <div class="container-fluid">
