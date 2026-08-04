@@ -21,8 +21,8 @@ services:
   web:
     build: .
     command: python manage.py runserver 0.0.0.0:8000
-    volumes:
-      - .:/app
+    #  volumes:
+    #  - .:/app
     ports:
       - "8000:8000"
     environment:
@@ -38,6 +38,8 @@ services:
     depends_on:
       - db
       - redis
+    # run as the unprivileged 'app' user created in the image (no override here so image USER is used)
+    # If you need to map host UIDs, use: user: "${PUID:-1000}:${PGID:-1000}"
 
 volumes:
   postgres_data:

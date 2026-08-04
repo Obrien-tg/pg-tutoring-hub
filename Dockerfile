@@ -28,6 +28,12 @@ RUN apt-get update && apt-get install -y \
 # Copy installed packages from builder
 COPY --from=builder /root/.local /root/.local
 
+# Create an unprivileged user and fix permissions so the container
+# does not need to run as root at runtime.
+RUN groupadd -r app && useradd -r -g app -d /home/app -s /sbin/nologin -m app \
+    && mkdir -p /home/app \
+    && chown -R app:app /home/app /app /root/.local
+
 # Copy app
 COPY . .
 
@@ -43,6 +49,9 @@ EXPOSE 8000
 
 # Set environment
 ENV PATH=/root/.local/bin:$PATH
+
+# Run as the unprivileged user created above
+USER app
 
 # Run with Gunicorn
 CMD ["gunicorn", "pg_hub.wsgi:application", "--bind", "0.0.0.0:8000"]
