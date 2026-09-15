@@ -7,7 +7,7 @@ services:
     environment:
       POSTGRES_DB: pg_tutoring
       POSTGRES_USER: pguser
-      POSTGRES_PASSWORD: pgpass123
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in your environment}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -29,12 +29,12 @@ services:
       - DEBUG=1
       - POSTGRES_DB=pg_tutoring
       - POSTGRES_USER=pguser
-      - POSTGRES_PASSWORD=pgpass123
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in your environment}
       - POSTGRES_HOST=db
       - POSTGRES_PORT=5432
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - SECRET_KEY=dev-secret-key-change-in-prod
+      - SECRET_KEY=${SECRET_KEY:?Set SECRET_KEY in your environment}
     depends_on:
       - db
       - redis
