@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ material.title }} - PG Tutoring{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <a href="{% url 'hub:materials_list' %}" class="text-decoration-none">&larr; Back to materials</a>
+    <div class="card mt-3">
+        <div class="card-body">
+            <h1>{{ material.title }}</h1>
+            <p class="text-muted">{{ material.subject.name }} &middot; {{ material.get_material_type_display }} &middot; {{ material.get_difficulty_level_display }}</p>
+            <p>{{ material.description }}</p>
+            <dl class="row">
+                <dt class="col-sm-3">Grade level</dt><dd class="col-sm-9">{{ material.get_grade_level_display }}</dd>
+                <dt class="col-sm-3">Estimated time</dt><dd class="col-sm-9">{{ material.estimated_time }} minutes</dd>
+                {% if material.tags %}<dt class="col-sm-3">Tags</dt><dd class="col-sm-9">{{ material.tags }}</dd>{% endif %}
+            </dl>
+            {% if material.file %}
+                <a href="{{ material.file.url }}" class="btn btn-primary" download><i class="fas fa-download"></i> Download material</a>
+            {% elif material.external_link %}
+                <a href="{{ material.external_link }}" class="btn btn-primary" target="_blank" rel="noopener"><i class="fas fa-external-link-alt"></i> Open resource</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

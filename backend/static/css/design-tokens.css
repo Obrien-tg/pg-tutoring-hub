@@ -1,0 +1,261 @@
+:root {
+    /* PG Tutoring Hub design tokens */
+    --pg-mint-100: #d5f5e8;
+    --pg-mint-300: #7dd9bb;
+    --pg-mint-500: #2fa98c;
+    --pg-mint-600: #1b7a5f;
+    --pg-mint-700: #176b57;
+
+    --pg-peach-100: #ffe5d9;
+    --pg-peach-300: #ffb894;
+    --pg-peach-500: #f08a4b;
+    --pg-peach-600: #d96f2e;
+
+    --pg-coral-100: #ffccc7;
+    --pg-coral-300: #ff8a84;
+    --pg-coral-500: #e56960;
+    --pg-coral-600: #d94840;
+
+    --pg-cream: #fffdf8;
+    --pg-surface: #ffffff;
+    --pg-surface-alt: #fffbf7;
+    --pg-border: #e8d5c8;
+    --pg-border-soft: #f0e8e0;
+    --pg-ink: #243b4a;
+    --pg-ink-soft: #5a6f7d;
+    --pg-ink-faint: #5a6f7d;
+    --pg-ink-inverse: #ffffff;
+
+    --pg-success-bg: #d5f5e8;
+    --pg-success-fg: var(--pg-mint-700);
+    --pg-warning-bg: #fdebd0;
+    --pg-warning-fg: #8a5a05;
+    --pg-danger-bg: #fadbd8;
+    --pg-danger-fg: #b03a2e;
+    --pg-info-bg: #d6eaf8;
+    --pg-info-fg: #21618c;
+
+    --pg-font-display: "Poppins", "Segoe UI", sans-serif;
+    --pg-font-body: "Nunito", "Segoe UI", system-ui, sans-serif;
+    --pg-font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+    --pg-radius-sm: 8px;
+    --pg-radius-md: 12px;
+    --pg-radius-lg: 16px;
+    --pg-radius-pill: 999px;
+    --pg-shadow-sm: 0 1px 2px rgba(36, 59, 74, 0.06), 0 1px 3px rgba(36, 59, 74, 0.08);
+    --pg-shadow-md: 0 4px 12px rgba(36, 59, 74, 0.08), 0 2px 4px rgba(36, 59, 74, 0.06);
+    --pg-motion-fast: 150ms;
+    --pg-motion-med: 250ms;
+    --pg-ease: cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Compatibility aliases for existing templates and utility classes. */
+    --bg-primary: var(--pg-cream);
+    --bg-surface: var(--pg-surface-alt);
+    --bg-card: var(--pg-surface);
+    --border: var(--pg-border);
+    --border-strong: var(--pg-border);
+    --text-primary: var(--pg-ink);
+    --text-secondary: var(--pg-ink-soft);
+    --text-muted: var(--pg-ink-faint);
+    --accent: var(--pg-mint-600);
+    --accent-soft: rgba(47, 169, 140, 0.16);
+    --accent-secondary: var(--pg-peach-300);
+    --accent-coral: var(--pg-coral-500);
+    --bs-body-bg: var(--pg-cream);
+    --bs-body-color: var(--pg-ink);
+    --bs-border-color: var(--pg-border);
+    --bs-primary: var(--pg-mint-600);
+    --bs-secondary: var(--pg-ink-soft);
+    --bs-link-color: var(--pg-mint-600);
+    --bs-link-hover-color: var(--pg-mint-700);
+}
+
+body {
+    background: var(--pg-cream);
+    color: var(--pg-ink);
+    font-family: var(--pg-font-body);
+}
+
+h1, h2, h3, h4, h5, h6, .navbar-brand, .card-title {
+    font-family: var(--pg-font-display);
+    font-weight: 600;
+}
+
+a {
+    color: var(--pg-mint-600);
+}
+
+a:hover {
+    color: var(--pg-mint-700);
+}
+
+:focus-visible {
+    outline: 3px solid var(--pg-mint-700);
+    outline-offset: 2px;
+    border-radius: var(--pg-radius-sm);
+}
+
+.btn {
+    border-radius: var(--pg-radius-pill);
+    font-weight: 700;
+    transition: all var(--pg-motion-fast) var(--pg-ease);
+}
+
+.btn:active {
+    transform: translateY(1px) scale(0.98);
+}
+
+.btn-primary,
+.btn-gradient {
+    --bs-btn-bg: var(--pg-mint-600);
+    --bs-btn-border-color: var(--pg-mint-600);
+    --bs-btn-hover-bg: var(--pg-mint-500);
+    --bs-btn-hover-border-color: var(--pg-mint-500);
+    --bs-btn-active-bg: var(--pg-mint-700);
+    --bs-btn-active-border-color: var(--pg-mint-700);
+    background: linear-gradient(135deg, var(--pg-mint-600), var(--pg-mint-700)) !important;
+    border: none !important;
+    color: var(--pg-ink-inverse) !important;
+}
+
+.btn-primary:hover,
+.btn-gradient:hover,
+.btn-sunshine:hover,
+.btn-ocean:hover,
+.btn-forest:hover,
+.btn-coral:hover {
+    color: var(--pg-ink-inverse) !important;
+}
+
+.btn-sunshine,
+.btn-ocean,
+.btn-forest,
+.btn-coral {
+    background: linear-gradient(135deg, var(--pg-mint-600), var(--pg-mint-700)) !important;
+    border: none !important;
+    color: var(--pg-ink-inverse) !important;
+}
+
+.btn-outline-primary {
+    --bs-btn-color: var(--pg-mint-700);
+    --bs-btn-border-color: var(--pg-mint-500);
+    --bs-btn-hover-bg: var(--pg-mint-600);
+    --bs-btn-hover-border-color: var(--pg-mint-600);
+    --bs-btn-hover-color: var(--pg-ink-inverse);
+}
+
+.card,
+.feature-card,
+.dashboard-card,
+.surface-card {
+    border: 1px solid var(--pg-border-soft);
+    border-radius: var(--pg-radius-md);
+    box-shadow: var(--pg-shadow-sm);
+    transition: box-shadow var(--pg-motion-med) var(--pg-ease);
+}
+
+.card:hover,
+.feature-card:hover,
+.dashboard-card:hover,
+.surface-card:hover {
+    box-shadow: var(--pg-shadow-md);
+}
+
+.badge {
+    border-radius: var(--pg-radius-pill);
+    font-weight: 700;
+}
+
+.badge.bg-primary,
+.badge.badge-primary {
+    background: var(--pg-mint-600) !important;
+}
+
+.badge.bg-secondary {
+    background: var(--pg-ink-soft) !important;
+}
+
+.badge-success {
+    background: var(--pg-success-bg);
+    color: var(--pg-success-fg);
+}
+
+.badge-warning {
+    background: var(--pg-warning-bg);
+    color: var(--pg-warning-fg);
+}
+
+.badge-danger {
+    background: var(--pg-danger-bg);
+    color: var(--pg-danger-fg);
+}
+
+.badge-info {
+    background: var(--pg-info-bg);
+    color: var(--pg-info-fg);
+}
+
+.form-control,
+.form-select,
+.input {
+    border-radius: var(--pg-radius-sm);
+    border-color: var(--pg-border);
+    background: var(--pg-surface);
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--pg-mint-500);
+    box-shadow: 0 0 0 3px rgba(47, 169, 140, 0.25);
+}
+
+.form-text {
+    color: var(--pg-ink-faint);
+}
+
+.sidebar {
+    background: linear-gradient(180deg, var(--pg-mint-600), var(--pg-mint-700));
+}
+
+.sidebar .nav-link {
+    color: rgba(255, 255, 255, 0.85);
+    border-radius: var(--pg-radius-sm);
+}
+
+.sidebar .nav-link:hover,
+.sidebar .nav-link.active {
+    background: rgba(255, 255, 255, 0.16);
+    color: var(--pg-ink-inverse);
+}
+
+.alert-success {
+    background: var(--pg-success-bg);
+    color: var(--pg-success-fg);
+    border: none;
+}
+
+.alert-warning {
+    background: var(--pg-warning-bg);
+    color: var(--pg-warning-fg);
+    border: none;
+}
+
+.alert-danger {
+    background: var(--pg-danger-bg);
+    color: var(--pg-danger-fg);
+    border: none;
+}
+
+.alert-info {
+    background: var(--pg-info-bg);
+    color: var(--pg-info-fg);
+    border: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }
+}

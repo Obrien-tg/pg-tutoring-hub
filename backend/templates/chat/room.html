@@ -7,7 +7,17 @@
     <h3>Chat Room</h3>
     <div class="card mt-3">
         <div class="card-body">
-            <div class="mb-3">Chat messages will appear here (WS implementation to follow).</div>
+            <div class="mb-3">
+                {% for message in chat_messages %}
+                    <div class="border-bottom py-2">
+                        <strong>{{ message.sender.get_full_name|default:message.sender.username }}</strong>
+                        <small class="text-muted">{{ message.timestamp|date:"M j, Y H:i" }}</small>
+                        <p class="mb-0">{{ message.content }}</p>
+                    </div>
+                {% empty %}
+                    <p class="text-muted mb-0">No messages yet. Start the conversation.</p>
+                {% endfor %}
+            </div>
             <form method="post" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="input-group">
