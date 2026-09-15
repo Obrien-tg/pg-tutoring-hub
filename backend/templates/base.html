@@ -133,6 +133,8 @@
       }
     </style>
 
+    <link href="{% static 'css/design-tokens.css' %}" rel="stylesheet" />
+
     {% block extra_css %}{% endblock %}
   </head>
   <body>
@@ -302,15 +304,6 @@
                     href="{% url 'users:register' %}?role=parent"
                   >
                     <i class="fas fa-users text-success"></i> Register as Parent
-                  </a>
-                </li>
-                <li>
-                  <a
-                    class="dropdown-item"
-                    href="{% url 'users:register' %}?role=teacher"
-                  >
-                    <i class="fas fa-chalkboard-teacher text-info"></i> Register
-                    as Teacher
                   </a>
                 </li>
                 <li><hr class="dropdown-divider" /></li>

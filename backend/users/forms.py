@@ -69,6 +69,9 @@ class CustomUserRegistrationForm(UserCreationForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields["user_type"].choices = [
+            choice for choice in CustomUser.USER_TYPES if choice[0] != "teacher"
+        ]
 
         # Add Bootstrap classes and enhance widgets
         for field_name, field in self.fields.items():

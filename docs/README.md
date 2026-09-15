@@ -44,7 +44,7 @@ pg_tutoring_hub/
 
 ### Communication
 
-- **Real-time Chat**: WebSocket-based messaging system
+- **Chat**: Plain HTTP messaging system for teacher-student/parent communication
 - **Announcements**: Broadcast messages to groups
 - **Direct Communication**: Teacher-student/parent messaging
 
@@ -53,7 +53,7 @@ pg_tutoring_hub/
 - **Backend**: Django 5.2.7
 - **Database**: PostgreSQL
 - **Frontend**: Bootstrap 5, Custom CSS/JS
-- **Real-time**: Django Channels + Redis
+- **Messaging**: Django HTTP views (with Channels/Redis available for future real-time support)
 - **Authentication**: Django's built-in auth with custom user model
 - **File Handling**: Django's file upload system
 
