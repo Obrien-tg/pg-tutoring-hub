@@ -120,7 +120,7 @@ class AssignmentSubmissionTestCase(TestCase):
             assignment=self.assignment, student=self.student
         )
         self.assertEqual(submission.submission_text, "Here is my text solution")
-        self.assertIsNone(submission.submission_file)
+        self.assertFalse(submission.submission_file)
 
     def test_submission_validation_requires_content(self):
         """Test that submission requires either text or file"""
@@ -223,7 +223,7 @@ class AssignmentSubmissionTestCase(TestCase):
         self.assertEqual(response.context["assignment"], self.assignment)
         self.assertIsNone(response.context["existing_submission"])
 
-    @patch("users.firebase_utils.send_submission_notification")
+    @patch("hub.views.send_submission_notification")
     def test_submission_triggers_firebase_push(self, mock_send_notification):
         """Test that assignment submission triggers Firebase push notification"""
         self.client.force_login(self.student)

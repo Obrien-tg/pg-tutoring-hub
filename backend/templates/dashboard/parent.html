@@ -15,7 +15,7 @@
     <div class="row g-3 mb-4">
         <div class="col-md-4"><div class="card h-100"><div class="card-body"><h6 class="text-muted">Children</h6><h2>{{ children|length }}</h2></div></div></div>
         <div class="col-md-4"><div class="card h-100"><div class="card-body"><h6 class="text-muted">Assignments</h6><h2>{{ total_assignments }}</h2></div></div></div>
-        <div class="col-md-4"><div class="card h-100"><div class="card-body"><h6 class="text-muted">Completed</h6><h2>{{ completed_assignments }}</h2><div class="progress"><div class="progress-bar" style="width: {{ completion_rate }}%">{{ completion_rate|floatformat:0 }}%</div></div></div></div></div>
+        <div class="col-md-4"><div class="card h-100"><div class="card-body"><h6 class="text-muted">Completed</h6><h2>{{ completed_assignments }}</h2><div class="progress" role="progressbar" aria-valuenow="{{ completion_rate|floatformat:0 }}" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar" style="width: {{ completion_rate }}%">{{ completion_rate|floatformat:0 }}%</div></div></div></div></div>
     </div>
 
     <div class="card">
