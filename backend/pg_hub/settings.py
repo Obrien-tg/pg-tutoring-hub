@@ -141,7 +141,7 @@ else:
                     "ENGINE": "django.db.backends.postgresql",
                     "NAME": config("POSTGRES_DB", default="pg_tutoring"),
                     "USER": config("POSTGRES_USER", default="pguser"),
-                    "PASSWORD": config("POSTGRES_PASSWORD", default="pgpass123"),
+                    "PASSWORD": config("POSTGRES_PASSWORD", default=""),
                     "HOST": config("POSTGRES_HOST", default="localhost"),
                     "PORT": config("POSTGRES_PORT", default="5432"),
                 }
@@ -153,7 +153,7 @@ else:
                 "ENGINE": "django.db.backends.postgresql",
                 "NAME": config("POSTGRES_DB", default="pg_tutoring"),
                 "USER": config("POSTGRES_USER", default="pguser"),
-                "PASSWORD": config("POSTGRES_PASSWORD", default="pgpass123"),
+                "PASSWORD": config("POSTGRES_PASSWORD", default=""),
                 "HOST": config("POSTGRES_HOST", default="localhost"),
                 "PORT": config("POSTGRES_PORT", default="5432"),
             }
