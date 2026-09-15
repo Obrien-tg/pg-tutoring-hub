@@ -13,22 +13,24 @@ from users.firebase_utils import send_submission_notification
 from .models import Assignment, AssignmentSubmission, Material, StudentProgress
 
 
+@login_required
 def materials_list(request):
     """List all available materials"""
     materials = Material.objects.filter(is_active=True)
     return render(request, "hub/materials_list.html", {"materials": materials})
 
 
+@login_required
 def material_detail(request, pk):
     """Show details of a specific material"""
     material = get_object_or_404(Material, pk=pk)
     return render(request, "hub/material_detail.html", {"material": material})
 
 
+@login_required
 def assignments_list(request):
     """List student assignments"""
-    # If logged in, show assigned assignments; otherwise show all
-    if request.user.is_authenticated and request.user.user_type == "student":
+    if request.user.user_type == "student":
         assignments = Assignment.objects.filter(assigned_to=request.user)
     else:
         assignments = Assignment.objects.all()

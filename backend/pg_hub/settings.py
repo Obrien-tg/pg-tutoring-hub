@@ -288,7 +288,6 @@ if not DEBUG:
     SECURE_SSL_REDIRECT = config("SECURE_SSL_REDIRECT", default=True, cast=bool)
     SESSION_COOKIE_SECURE = config("SESSION_COOKIE_SECURE", default=True, cast=bool)
     CSRF_COOKIE_SECURE = config("CSRF_COOKIE_SECURE", default=True, cast=bool)
-    SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
     SECURE_HSTS_SECONDS = 31536000  # 1 year
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
@@ -357,9 +356,6 @@ if not DEBUG:
     CSRF_COOKIE_SECURE = config("CSRF_COOKIE_SECURE", default=True, cast=bool)
 
     # Additional Security Headers
-    SECURE_BROWSER_XSS_FILTER = config(
-        "SECURE_BROWSER_XSS_FILTER", default=True, cast=bool
-    )
     SECURE_CONTENT_TYPE_NOSNIFF = config(
         "SECURE_CONTENT_TYPE_NOSNIFF", default=True, cast=bool
     )
@@ -368,7 +364,7 @@ if not DEBUG:
     # Cookie Settings
     SESSION_COOKIE_HTTPONLY = True
     CSRF_COOKIE_HTTPONLY = True
-    SESSION_COOKIE_SAMESITE = "Strict"
+    SESSION_COOKIE_SAMESITE = "Lax"
     CSRF_COOKIE_SAMESITE = "Strict"
 
     # Frame options and referrer policy
