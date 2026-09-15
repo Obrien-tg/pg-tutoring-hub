@@ -7,7 +7,7 @@ services:
     environment:
       POSTGRES_DB: pg_tutoring
       POSTGRES_USER: pguser
-      POSTGRES_PASSWORD: pgpass123
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in your environment}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -21,23 +21,25 @@ services:
   web:
     build: .
     command: python manage.py runserver 0.0.0.0:8000
-    volumes:
-      - .:/app
+    #  volumes:
+    #  - .:/app
     ports:
       - "8000:8000"
     environment:
       - DEBUG=1
       - POSTGRES_DB=pg_tutoring
       - POSTGRES_USER=pguser
-      - POSTGRES_PASSWORD=pgpass123
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in your environment}
       - POSTGRES_HOST=db
       - POSTGRES_PORT=5432
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - SECRET_KEY=dev-secret-key-change-in-prod
+      - SECRET_KEY=${SECRET_KEY:?Set SECRET_KEY in your environment}
     depends_on:
       - db
       - redis
+    # run as the unprivileged 'app' user created in the image (no override here so image USER is used)
+    # If you need to map host UIDs, use: user: "${PUID:-1000}:${PGID:-1000}"
 
 volumes:
   postgres_data:

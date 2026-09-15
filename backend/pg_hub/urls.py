@@ -20,12 +20,18 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.http import JsonResponse
 from django.urls import include, path
+from django.views.generic import TemplateView
 
 urlpatterns = [
     # Configurable admin URL (default 'admin/') configured via settings.ADMIN_URL
     path(getattr(settings, "ADMIN_URL", "admin/"), admin.site.urls),
     # Lightweight health check endpoint
     path("healthz", lambda request: JsonResponse({"status": "ok"})),
+    path(
+        "offline.html",
+        TemplateView.as_view(template_name="offline.html"),
+        name="offline",
+    ),
     path("", include("core.urls")),
     path("users/", include("users.urls")),
     path("dashboard/", include("dashboard.urls")),

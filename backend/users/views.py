@@ -23,6 +23,8 @@ def register(request):
     """User registration view"""
     # Get role from URL parameter if provided
     initial_role = request.GET.get("role", "student")
+    if initial_role == "teacher":
+        initial_role = "student"
 
     if request.method == "POST":
         form = CustomUserRegistrationForm(request.POST)
@@ -58,12 +60,6 @@ def register(request):
                 "description": "Monitor your child's progress, communicate with Teacher Patience, and stay involved in their learning journey.",
                 "icon": "fas fa-users",
                 "color": "success",
-            },
-            "teacher": {
-                "title": "Teacher Registration",
-                "description": "Manage students, create assignments, upload materials, and build your tutoring community.",
-                "icon": "fas fa-chalkboard-teacher",
-                "color": "info",
             },
         },
     }

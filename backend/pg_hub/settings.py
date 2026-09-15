@@ -24,7 +24,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config(
     "SECRET_KEY",
-    default="django-insecure-paa)0d^(ckmbv$#=_v1&tvy9&6@*j%8wvp(yq56ju#g)(5=l(k",
 )
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -132,7 +131,6 @@ else:
                     conn_health_checks=True,
                 )
             }
-            print(f"✅ Database configured from DATABASE_URL: {DATABASE_URL[:20]}...")
         except Exception as e:
             print(f"❌ Error parsing DATABASE_URL: {e}")
             # Fallback to individual settings
@@ -141,7 +139,7 @@ else:
                     "ENGINE": "django.db.backends.postgresql",
                     "NAME": config("POSTGRES_DB", default="pg_tutoring"),
                     "USER": config("POSTGRES_USER", default="pguser"),
-                    "PASSWORD": config("POSTGRES_PASSWORD", default="pgpass123"),
+                    "PASSWORD": config("POSTGRES_PASSWORD", default=""),
                     "HOST": config("POSTGRES_HOST", default="localhost"),
                     "PORT": config("POSTGRES_PORT", default="5432"),
                 }
@@ -153,7 +151,7 @@ else:
                 "ENGINE": "django.db.backends.postgresql",
                 "NAME": config("POSTGRES_DB", default="pg_tutoring"),
                 "USER": config("POSTGRES_USER", default="pguser"),
-                "PASSWORD": config("POSTGRES_PASSWORD", default="pgpass123"),
+                "PASSWORD": config("POSTGRES_PASSWORD", default=""),
                 "HOST": config("POSTGRES_HOST", default="localhost"),
                 "PORT": config("POSTGRES_PORT", default="5432"),
             }
@@ -290,7 +288,6 @@ if not DEBUG:
     SECURE_SSL_REDIRECT = config("SECURE_SSL_REDIRECT", default=True, cast=bool)
     SESSION_COOKIE_SECURE = config("SESSION_COOKIE_SECURE", default=True, cast=bool)
     CSRF_COOKIE_SECURE = config("CSRF_COOKIE_SECURE", default=True, cast=bool)
-    SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
     SECURE_HSTS_SECONDS = 31536000  # 1 year
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
@@ -359,9 +356,6 @@ if not DEBUG:
     CSRF_COOKIE_SECURE = config("CSRF_COOKIE_SECURE", default=True, cast=bool)
 
     # Additional Security Headers
-    SECURE_BROWSER_XSS_FILTER = config(
-        "SECURE_BROWSER_XSS_FILTER", default=True, cast=bool
-    )
     SECURE_CONTENT_TYPE_NOSNIFF = config(
         "SECURE_CONTENT_TYPE_NOSNIFF", default=True, cast=bool
     )
@@ -370,7 +364,7 @@ if not DEBUG:
     # Cookie Settings
     SESSION_COOKIE_HTTPONLY = True
     CSRF_COOKIE_HTTPONLY = True
-    SESSION_COOKIE_SAMESITE = "Strict"
+    SESSION_COOKIE_SAMESITE = "Lax"
     CSRF_COOKIE_SAMESITE = "Strict"
 
     # Frame options and referrer policy

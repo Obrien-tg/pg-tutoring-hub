@@ -120,7 +120,7 @@ class AssignmentSubmissionTestCase(TestCase):
             assignment=self.assignment, student=self.student
         )
         self.assertEqual(submission.submission_text, "Here is my text solution")
-        self.assertIsNone(submission.submission_file)
+        self.assertFalse(submission.submission_file)
 
     def test_submission_validation_requires_content(self):
         """Test that submission requires either text or file"""
@@ -223,7 +223,7 @@ class AssignmentSubmissionTestCase(TestCase):
         self.assertEqual(response.context["assignment"], self.assignment)
         self.assertIsNone(response.context["existing_submission"])
 
-    @patch("users.firebase_utils.send_submission_notification")
+    @patch("hub.views.send_submission_notification")
     def test_submission_triggers_firebase_push(self, mock_send_notification):
         """Test that assignment submission triggers Firebase push notification"""
         self.client.force_login(self.student)
@@ -241,3 +241,58 @@ class AssignmentSubmissionTestCase(TestCase):
             assignment=self.assignment, student=self.student
         )
         mock_send_notification.assert_called_with(submission)
+
+
+class HubAccessControlTests(TestCase):
+    """Teaching content must require authentication."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.teacher = User.objects.create_user(
+            username="access_teacher",
+            email="access-teacher@example.com",
+            password="pass12345",
+            user_type="teacher",
+        )
+        cls.student = User.objects.create_user(
+            username="access_student",
+            email="access-student@example.com",
+            password="pass12345",
+            user_type="student",
+            grade_level="5",
+            parent_email="parent@example.com",
+        )
+        cls.subject = Subject.objects.create(
+            name="Access Mathematics", color_code="#1B7A5F"
+        )
+        cls.material = Material.objects.create(
+            title="Fractions Worksheet",
+            description="Practice fractions",
+            material_type="worksheet",
+            subject=cls.subject,
+            difficulty_level="beginner",
+            grade_level="5",
+            estimated_time=30,
+            external_link="https://example.com/fractions",
+            uploaded_by=cls.teacher,
+        )
+
+    def test_materials_list_requires_login(self):
+        response = self.client.get(reverse("hub:materials_list"))
+        self.assertEqual(response.status_code, 302)
+
+    def test_material_detail_requires_login(self):
+        response = self.client.get(
+            reverse("hub:material_detail", args=[self.material.pk])
+        )
+        self.assertEqual(response.status_code, 302)
+
+    def test_assignments_list_requires_login(self):
+        response = self.client.get(reverse("hub:assignments_list"))
+        self.assertEqual(response.status_code, 302)
+
+    def test_logged_in_student_sees_materials(self):
+        self.client.force_login(self.student)
+        response = self.client.get(reverse("hub:materials_list"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Fractions Worksheet")

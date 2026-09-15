@@ -218,22 +218,26 @@ def send_assignment_notification(assignment, action="created"):
 
     data = {"type": "assignment", "assignment_id": str(assignment.id), "action": action}
 
-    # Send to the student
-    return send_notification_to_user(assignment.student, notification_data, data)
+    sent = 0
+    for student in assignment.assigned_to.all():
+        sent += send_notification_to_user(student, notification_data, data)
+    return sent
 
 
-def send_chat_notification(message, room):
+def send_chat_notification(message, room=None):
     """Send notification about new chat messages"""
+    room = room or message.room
+    sender = message.sender
     notification_data = {
         "title": f"New message in {room.name}",
-        "body": f"{message.user.first_name or message.user.username}: {message.content[:50]}...",
+        "body": f"{sender.first_name or sender.username}: {message.content[:50]}...",
         "icon": "/static/img/chat-icon.png",
     }
 
     data = {"type": "chat", "room_id": str(room.id), "message_id": str(message.id)}
 
     # Send to all room participants except the sender
-    participants = room.participants.exclude(id=message.user.id)
+    participants = room.participants.exclude(id=sender.id)
     return send_notification_to_users(list(participants), notification_data, data)
 
 
