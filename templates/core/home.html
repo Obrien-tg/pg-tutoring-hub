@@ -130,7 +130,6 @@
 
                 <div class="section-actions">
                     <a href="{% url 'users:register' %}?role=parent" class="btn btn-primary">Register as parent</a>
-                    <a href="{% url 'users:register' %}?role=teacher" class="btn btn-ghost">Register as teacher</a>
                 </div>
             </div>
 
@@ -179,12 +178,6 @@
                 <h3 class="h5 mb-3">Follow progress and stay informed.</h3>
                 <p class="mb-4">Register as a parent to keep track of activity and milestones.</p>
                 <a href="{% url 'users:register' %}?role=parent" class="btn btn-primary w-100">Register as parent</a>
-            </div>
-            <div class="callout-card">
-                <div class="small-meta mb-2">Teacher</div>
-                <h3 class="h5 mb-3">Manage classes, materials, and submissions.</h3>
-                <p class="mb-4">Sign up as a teacher to use the full tutoring workflow.</p>
-                <a href="{% url 'users:register' %}?role=teacher" class="btn btn-primary w-100">Register as teacher</a>
             </div>
         </div>
     </div>
