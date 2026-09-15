@@ -1,3 +1,6 @@
+import os
+import secrets
+
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 from django.utils import timezone
@@ -9,7 +12,17 @@ class Command(BaseCommand):
     help = "Create demo users and seed sample data for testing"
 
     def handle(self, *args, **options):
+        if os.environ.get("DEMO_MODE", "").lower() not in {"1", "true", "yes"}:
+            self.stderr.write(
+                self.style.ERROR(
+                    "Demo setup is disabled. Set DEMO_MODE=True only in a disposable "
+                    "development or staging environment."
+                )
+            )
+            return
+
         User = get_user_model()
+        demo_password = secrets.token_urlsafe(18)
 
         self.stdout.write("🚀 Setting up demo environment...")
 
@@ -26,9 +39,13 @@ class Command(BaseCommand):
             }
         )
         if created:
-            teacher.set_password("demo123")
+            teacher.set_password(demo_password)
             teacher.save()
-            self.stdout.write(self.style.SUCCESS("✅ Created demo teacher: demo_teacher / demo123"))
+            self.stdout.write(
+                self.style.SUCCESS(
+                    f"✅ Created demo teacher: demo_teacher / {demo_password}"
+                )
+            )
 
         # Create demo student
         student, created = User.objects.get_or_create(
@@ -44,9 +61,13 @@ class Command(BaseCommand):
             }
         )
         if created:
-            student.set_password("demo123")
+            student.set_password(demo_password)
             student.save()
-            self.stdout.write(self.style.SUCCESS("✅ Created demo student: demo_student / demo123"))
+            self.stdout.write(
+                self.style.SUCCESS(
+                    f"✅ Created demo student: demo_student / {demo_password}"
+                )
+            )
 
         # Create subjects
         subjects_data = [
@@ -151,10 +172,6 @@ class Command(BaseCommand):
         self.stdout.write("\n" + "="*50)
         self.stdout.write(self.style.SUCCESS("🎉 DEMO SETUP COMPLETE!"))
         self.stdout.write("="*50)
-        self.stdout.write("\n📚 Demo Accounts:")
-        self.stdout.write("   Teacher: demo_teacher / demo123")
-        self.stdout.write("   Student: demo_student / demo123")
-        self.stdout.write("\n🌐 Test the app at: https://pg-tutoring-hub.onrender.com/")
         self.stdout.write("\n📋 What to test:")
         self.stdout.write("   • Login with both accounts")
         self.stdout.write("   • View materials and assignments")
