@@ -5,230 +5,128 @@
 {% block content %}
 <div class="container-fluid">
     <div class="row">
-        <!-- Sidebar -->
-        <div class="col-md-3 col-lg-2 sidebar">
+        <aside class="col-md-3 col-lg-2 sidebar">
             <div class="pt-3">
-                <h5 class="text-center text-white">
-                    <i class="fas fa-graduation-cap"></i> Student Panel
-                </h5>
+                <h5 class="text-center text-white"><i class="fas fa-graduation-cap"></i> Student Panel</h5>
                 <hr class="text-white">
-                
                 <nav class="nav flex-column">
-                    <a class="nav-link active" href="#overview">
-                        <i class="fas fa-tachometer-alt"></i> Overview
-                    </a>
-                    <a class="nav-link" href="/hub/">
-                        <i class="fas fa-book-open"></i> Learning Hub
-                    </a>
-                    <a class="nav-link" href="/hub/assignments/">
-                        <i class="fas fa-tasks"></i> My Assignments
-                    </a>
-                    <a class="nav-link" href="/chat/">
-                        <i class="fas fa-comments"></i> Chat with Teacher
-                    </a>
-                    <a class="nav-link" href="/hub/progress/">
-                        <i class="fas fa-chart-line"></i> My Progress
-                    </a>
+                    <a class="nav-link active" href="#overview"><i class="fas fa-tachometer-alt"></i> Overview</a>
+                    <a class="nav-link" href="{% url 'hub:materials_list' %}"><i class="fas fa-book-open"></i> Learning Hub</a>
+                    <a class="nav-link" href="{% url 'hub:assignments_list' %}"><i class="fas fa-tasks"></i> My Assignments</a>
+                    <a class="nav-link" href="{% url 'chat:rooms_list' %}"><i class="fas fa-comments"></i> Chat with Teacher</a>
+                    <a class="nav-link" href="{% url 'hub:progress' %}"><i class="fas fa-chart-line"></i> My Progress</a>
                 </nav>
             </div>
-        </div>
+        </aside>
 
-        <!-- Main Content -->
-        <div class="col-md-9 col-lg-10 ms-sm-auto px-md-4">
-            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <h1 class="h2">
-                    <i class="fas fa-star text-warning"></i> Welcome back, {{ user.first_name|default:user.username }}!
-                </h1>
-                <div class="btn-toolbar mb-2 mb-md-0">
-                    <button type="button" class="btn btn-sm btn-primary">
-                        <i class="fas fa-question-circle"></i> Ask Teacher
-                    </button>
+        <main class="col-md-9 col-lg-10 ms-sm-auto px-md-4" id="overview">
+            <div class="d-flex justify-content-between flex-wrap align-items-center pt-3 pb-2 mb-4 border-bottom">
+                <div>
+                    <p class="text-muted mb-1">Your next small step</p>
+                    <h1 class="h2 mb-0">Welcome back, {{ user.first_name|default:user.username }}!</h1>
                 </div>
+                <a href="{% url 'chat:rooms_list' %}" class="btn btn-primary"><i class="fas fa-question-circle"></i> Ask Teacher</a>
             </div>
 
-            <!-- Mom's Photo Section -->
-            <div class="text-center my-4 p-4 bg-gradient-light rounded shadow-sm">
-                {% include 'components/tutor_card.html' %}
-                <p class="mt-3 mb-0 text-muted small">
-                    <em>"Every lesson is built with love — from my mom to your family."</em>
-                </p>
+            <section class="card border-0 bg-primary text-white mb-4">
+                <div class="card-body p-4">
+                    {% if next_assignment %}
+                        <div class="d-flex justify-content-between align-items-start gap-3">
+                            <div>
+                                <span class="badge bg-light text-primary mb-2">DO NOW</span>
+                                <h2 class="h3">{{ next_assignment.title }}</h2>
+                                <p class="mb-2">{{ next_assignment.material.subject.name }} &middot; Due {{ next_assignment.due_date|date:"D, M j \a\t H:i" }}</p>
+                                {% if next_assignment_submission.revision_requested %}
+                                    <p class="mb-0"><i class="fas fa-heart"></i> Your teacher asked for one more try: {{ next_assignment_submission.revision_notes|truncatewords:20 }}</p>
+                                {% else %}
+                                    <p class="mb-0">{{ next_assignment.description|truncatewords:24 }}</p>
+                                {% endif %}
+                            </div>
+                            <a href="{% url 'hub:assignment_detail' next_assignment.pk %}" class="btn btn-light text-primary flex-shrink-0">Start <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    {% else %}
+                        <span class="badge bg-light text-primary mb-2">ALL CAUGHT UP</span>
+                        <h2 class="h3">You have no assignment waiting.</h2>
+                        <p class="mb-0">Take a look at the learning hub or ask your teacher what to explore next.</p>
+                    {% endif %}
+                </div>
+            </section>
+
+            <div class="row g-3 mb-4">
+                <div class="col-sm-4"><div class="card h-100"><div class="card-body"><small class="text-muted">Assignments</small><h2 class="mb-0">{{ total_assignments }}</h2></div></div></div>
+                <div class="col-sm-4"><div class="card h-100"><div class="card-body"><small class="text-muted">Completed</small><h2 class="mb-0">{{ completed_assignments }}</h2></div></div></div>
+                <div class="col-sm-4"><div class="card h-100"><div class="card-body"><small class="text-muted">Completion</small><h2 class="mb-0">{{ completion_rate|floatformat:0 }}%</h2></div></div></div>
             </div>
 
-            <!-- Progress Cards -->
-            <div class="row mb-4">
-                <div class="col-md-4 mb-3">
-                    <div class="card bg-primary text-white">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <h4 class="card-title">{{ total_assignments }}</h4>
-                                    <p class="card-text">Total Assignments</p>
-                                </div>
-                                <div class="align-self-center">
-                                    <i class="fas fa-tasks fa-2x"></i>
-                                </div>
-                            </div>
+            <div class="row g-4">
+                <div class="col-lg-7">
+                    <section class="card h-100">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h2 class="h5 mb-0"><i class="fas fa-award text-warning"></i> Recently graded</h2>
+                            <a href="{% url 'hub:assignments_list' %}" class="small">View assignments</a>
                         </div>
-                    </div>
+                        <div class="card-body">
+                            {% for submission in graded_submissions %}
+                                <div class="border-bottom py-3">
+                                    <div class="d-flex justify-content-between gap-2">
+                                        <strong>{{ submission.assignment.title }}</strong>
+                                        <span class="badge bg-success">{{ submission.grade|default:submission.numeric_score }}</span>
+                                    </div>
+                                    {% if submission.teacher_feedback %}<p class="mb-0 mt-2 text-muted">“{{ submission.teacher_feedback|truncatewords:28 }}”</p>{% endif %}
+                                </div>
+                            {% empty %}
+                                <div class="text-center py-3 text-muted"><i class="fas fa-seedling fa-2x mb-2"></i><p class="mb-0">Your teacher's feedback will appear here.</p></div>
+                            {% endfor %}
+                        </div>
+                    </section>
                 </div>
 
-                <div class="col-md-4 mb-3">
-                    <div class="card bg-success text-white">
+                <div class="col-lg-5">
+                    <section class="card h-100">
+                        <div class="card-header"><h2 class="h5 mb-0"><i class="fas fa-compass text-primary"></i> Subject mastery</h2></div>
                         <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <h4 class="card-title">{{ completed_assignments }}</h4>
-                                    <p class="card-text">Completed</p>
-                                </div>
-                                <div class="align-self-center">
-                                    <i class="fas fa-check-circle fa-2x"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-4 mb-3">
-                    <div class="card bg-info text-white">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <h4 class="card-title">{{ completion_rate|floatformat:1 }}%</h4>
-                                    <p class="card-text">Success Rate</p>
-                                </div>
-                                <div class="align-self-center">
-                                    <i class="fas fa-chart-pie fa-2x"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Learning Materials -->
-            <div class="row">
-                <div class="col-lg-8">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5><i class="fas fa-book-open"></i> Available Learning Materials</h5>
-                        </div>
-                        <div class="card-body">
-                            {% if recent_materials %}
-                                <div class="row">
-                                    {% for material in recent_materials %}
-                                        <div class="col-md-6 mb-3">
-                                            <div class="card border-left-primary h-100">
-                                                <div class="card-body">
-                                                    <h6 class="card-title">{{ material.title }}</h6>
-                                                    <p class="card-text text-muted">{{ material.subject.name }}</p>
-                                                    <p class="card-text">
-                                                        <small class="text-muted">
-                                                            <i class="fas fa-clock"></i> {{ material.estimated_time }} min
-                                                            <span class="badge bg-secondary ms-2">{{ material.difficulty_level }}</span>
-                                                        </small>
-                                                    </p>
-                                                    <a href="/hub/material/{{ material.id }}/" class="btn btn-primary btn-sm">
-                                                        <i class="fas fa-play"></i> Start Learning
-                                                    </a>
-                                                </div>
-                                            </div>
+                            <div class="row g-3">
+                                {% for subject in subject_mastery %}
+                                    <div class="col-6">
+                                        <div class="p-3 rounded" style="background: {{ subject.color }}22;">
+                                            <strong class="d-block">{{ subject.name }}</strong>
+                                            <span class="h4">{{ subject.percentage }}%</span>
+                                            <small class="d-block text-muted">{% if subject.percentage >= 80 %}Feeling strong{% elif subject.percentage > 0 %}Getting there{% else %}Ready to start{% endif %}</small>
                                         </div>
-                                    {% endfor %}
-                                </div>
-                            {% else %}
-                                <div class="text-center py-4 text-muted">
-                                    <i class="fas fa-book fa-3x mb-3"></i>
-                                    <p>No learning materials available yet.</p>
-                                </div>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-4">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5><i class="fas fa-comments"></i> Recent Conversations</h5>
-                        </div>
-                        <div class="card-body">
-                            {% if my_chats %}
-                                <div class="list-group list-group-flush">
-                                    {% for chat in my_chats %}
-                                        <a href="/chat/room/{{ chat.id }}/" class="list-group-item list-group-item-action">
-                                            <div class="d-flex w-100 justify-content-between">
-                                                <h6 class="mb-1">{{ chat.name }}</h6>
-                                                <small>{{ chat.latest_message.timestamp|timesince }} ago</small>
-                                            </div>
-                                            {% if chat.latest_message %}
-                                                <p class="mb-1">{{ chat.latest_message.content|truncatewords:8 }}</p>
-                                            {% endif %}
-                                        </a>
-                                    {% endfor %}
-                                </div>
-                            {% else %}
-                                <div class="text-center py-4 text-muted">
-                                    <i class="fas fa-comments fa-3x mb-3"></i>
-                                    <p>No conversations yet</p>
-                                    <a href="/chat/" class="btn btn-primary btn-sm">Start a Chat</a>
-                                </div>
-                            {% endif %}
-                        </div>
-                    </div>
-
-                    <!-- Upcoming Assignments -->
-                    <div class="card mt-3">
-                        <div class="card-header">
-                            <h5><i class="fas fa-calendar-alt"></i> Upcoming Assignments</h5>
-                        </div>
-                        <div class="card-body">
-                            {% if my_assignments %}
-                                <div class="list-group list-group-flush">
-                                    {% for assignment in my_assignments %}
-                                        <div class="list-group-item">
-                                            <div class="d-flex w-100 justify-content-between">
-                                                <h6 class="mb-1">{{ assignment.title }}</h6>
-                                                <small class="text-danger">Due: {{ assignment.due_date|date:"M d" }}</small>
-                                            </div>
-                                            <p class="mb-1">{{ assignment.description|truncatewords:10 }}</p>
-                                            <small class="text-muted">{{ assignment.material.subject.name }}</small>
-                                        </div>
-                                    {% endfor %}
-                                </div>
-                            {% else %}
-                                <div class="text-center py-4 text-muted">
-                                    <i class="fas fa-calendar fa-3x mb-3"></i>
-                                    <p>No upcoming assignments</p>
-                                </div>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Achievement Badge -->
-            <div class="row mt-4">
-                <div class="col-12">
-                    <div class="card bg-light">
-                        <div class="card-body">
-                            <div class="text-center">
-                                <h5><i class="fas fa-trophy text-warning"></i> Keep up the great work!</h5>
-                                <p class="text-muted">You're doing amazing in your learning journey. Patience is proud of your progress!</p>
-                                <div class="mt-3">
-                                    <span class="badge bg-warning text-dark me-2">
-                                        <i class="fas fa-star"></i> Dedicated Learner
-                                    </span>
-                                    {% if completion_rate > 80 %}
-                                        <span class="badge bg-success text-white me-2">
-                                            <i class="fas fa-medal"></i> High Achiever
-                                        </span>
-                                    {% endif %}
-                                </div>
+                                    </div>
+                                {% empty %}
+                                    <p class="text-muted mb-0">Complete a learning activity to see your subject progress.</p>
+                                {% endfor %}
                             </div>
                         </div>
-                    </div>
+                    </section>
                 </div>
             </div>
-        </div>
+
+            <section class="card my-4">
+                <div class="card-header"><h2 class="h5 mb-0"><i class="fas fa-calendar-week text-info"></i> This week's effort</h2></div>
+                <div class="card-body">
+                    <div class="row row-cols-7 g-2 text-center">
+                        {% for day in weekly_effort %}
+                            <div class="col"><small class="text-muted d-block">{{ day.date|date:"D" }}</small><div class="progress mt-2" style="height: 7px;"><div class="progress-bar" role="progressbar" style="width: {% if day.minutes > 0 %}100{% else %}8{% endif %}%"></div></div><small>{{ day.minutes }}m</small></div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </section>
+
+            <section class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center"><h2 class="h5 mb-0"><i class="fas fa-book-open"></i> New learning materials</h2><a href="{% url 'hub:materials_list' %}" class="small">See all</a></div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        {% for material in recent_materials %}
+                            <div class="col-md-6"><a class="text-decoration-none" href="{% url 'hub:material_detail' material.pk %}"><strong>{{ material.title }}</strong><span class="d-block text-muted">{{ material.subject.name }} &middot; {{ material.estimated_time }} min</span></a></div>
+                        {% empty %}
+                            <p class="text-muted mb-0">No learning materials are available yet.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </section>
+        </main>
     </div>
 </div>
 {% endblock %}
