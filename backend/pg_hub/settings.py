@@ -24,7 +24,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config(
     "SECRET_KEY",
-    default="django-insecure-paa)0d^(ckmbv$#=_v1&tvy9&6@*j%8wvp(yq56ju#g)(5=l(k",
 )
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -132,7 +131,6 @@ else:
                     conn_health_checks=True,
                 )
             }
-            print(f"✅ Database configured from DATABASE_URL: {DATABASE_URL[:20]}...")
         except Exception as e:
             print(f"❌ Error parsing DATABASE_URL: {e}")
             # Fallback to individual settings
