@@ -183,8 +183,6 @@ def submit_assignment(request, assignment_id):
                 messages.success(
                     request, "Your assignment has been submitted successfully!"
                 )
-                # Send notification
-                send_submission_notification(request.user, assignment)
 
             return redirect("hub:assignments_list")
 

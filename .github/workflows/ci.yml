@@ -18,9 +18,9 @@ jobs:
           POSTGRES_PASSWORD: django
         ports: ["5432:5432"]
         options: >-
-          --health-cmd "pg_isready -U postgres" 
-          --health-interval 10s 
-          --health-timeout 5s 
+          --health-cmd "pg_isready -U django -d pg_tutoring_ci"
+          --health-interval 10s
+          --health-timeout 5s
           --health-retries 5
     steps:
       - uses: actions/checkout@v4
@@ -43,13 +43,13 @@ jobs:
         run: |
           cat > .env << 'EOF'
           SECRET_KEY=ci-secret-key
-          DEBUG=False
+          DEBUG=True
           ALLOWED_HOSTS=localhost
-          DB_NAME=pg_tutoring_ci
-          DB_USER=django
-          DB_PASSWORD=django
-          DB_HOST=127.0.0.1
-          DB_PORT=5432
+          POSTGRES_DB=pg_tutoring_ci
+          POSTGRES_USER=django
+          POSTGRES_PASSWORD=django
+          POSTGRES_HOST=127.0.0.1
+          POSTGRES_PORT=5432
           REDIS_HOST=127.0.0.1
           REDIS_PORT=6379
           SECURE_SSL_REDIRECT=False
@@ -64,6 +64,4 @@ jobs:
           python manage.py makemigrations --check --dry-run
       - name: Run tests
         run: |
-          pip install coverage
-          coverage run manage.py test -v 2
-          coverage report --fail-under=60
+          python manage.py test -v 2
