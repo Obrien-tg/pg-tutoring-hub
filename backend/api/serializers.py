@@ -1,7 +1,12 @@
 from rest_framework import serializers
 
 from chat.models import ChatRoom, Message
-from hub.models import Assignment, Material, StudentProgress
+from hub.models import (
+    Assignment,
+    AssignmentSubmission,
+    Material,
+    StudentProgress,
+)
 
 
 class UserSerializer(serializers.Serializer):
@@ -37,6 +42,29 @@ class AssignmentSerializer(serializers.ModelSerializer):
             "id", "title", "description", "material", "material_title", "assigned_to",
             "due_date", "priority", "max_score", "instructions",
             "submission_format", "is_active",
+        )
+
+
+class AssignmentSubmissionSerializer(serializers.ModelSerializer):
+    assignment_title = serializers.CharField(
+        source="assignment.title",
+        read_only=True,
+    )
+
+    class Meta:
+        model = AssignmentSubmission
+        fields = (
+            "id",
+            "assignment",
+            "assignment_title",
+            "status",
+            "grade",
+            "numeric_score",
+            "teacher_feedback",
+            "submitted_at",
+            "graded_at",
+            "revision_requested",
+            "revision_notes",
         )
 
 

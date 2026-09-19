@@ -1,15 +1,12 @@
-from datetime import timedelta
-
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
-from django.utils import timezone
-
-from chat.models import ChatRoom, Message
-from hub.models import Assignment, AssignmentSubmission, Material, StudentProgress
+from chat.models import Message
+from hub.models import Assignment, Material
 
 from .forms import AnnouncementForm, CreateAssignmentForm, CreateMaterialForm
+from .services import build_student_dashboard
 
 User = get_user_model()
 
@@ -63,100 +60,11 @@ def student_dashboard(request):
     if not request.user.is_student:
         return redirect("users:dashboard")
 
-    my_assignments = list(
-        Assignment.objects.filter(
-            assigned_to=request.user,
-            is_active=True,
-        )
-        .select_related("material__subject")
-        .order_by("due_date")
+    return render(
+        request,
+        "dashboard/student.html",
+        build_student_dashboard(request.user),
     )
-    submissions = {
-        submission.assignment_id: submission
-        for submission in AssignmentSubmission.objects.filter(
-            student=request.user,
-            assignment_id__in=[assignment.pk for assignment in my_assignments],
-        )
-    }
-    next_assignment = next(
-        (
-            assignment
-            for assignment in my_assignments
-            if assignment.pk not in submissions
-            or submissions[assignment.pk].revision_requested
-        ),
-        None,
-    )
-
-    my_progress = list(
-        StudentProgress.objects.filter(student=request.user).select_related(
-            "material__subject"
-        )
-    )
-    completed_count = sum(
-        1 for progress in my_progress if progress.completed_at is not None
-    )
-    graded_submissions = list(
-        AssignmentSubmission.objects.filter(
-            student=request.user, status="graded"
-        )
-        .select_related("assignment__material__subject")
-        .order_by("-graded_at")[:3]
-    )
-
-    mastery_by_subject = {}
-    for progress in my_progress:
-        subject = progress.material.subject
-        subject_data = mastery_by_subject.setdefault(
-            subject.pk,
-            {"name": subject.name, "color": subject.color_code, "total": 0, "points": 0},
-        )
-        subject_data["total"] += 1
-        subject_data["points"] += progress.completion_percentage
-    subject_mastery = [
-        {**subject_data, "percentage": round(subject_data["points"] / subject_data["total"])}
-        for subject_data in mastery_by_subject.values()
-    ][:4]
-
-    today = timezone.localdate()
-    week_start = today - timedelta(days=6)
-    weekly_effort = [
-        {"date": week_start + timedelta(days=index), "minutes": 0}
-        for index in range(7)
-    ]
-    for progress in my_progress:
-        if progress.started_at and timezone.localtime(progress.started_at).date() >= week_start:
-            offset = (timezone.localtime(progress.started_at).date() - week_start).days
-            weekly_effort[offset]["minutes"] += progress.time_spent_minutes
-
-    recent_materials = (
-        Material.objects.filter(is_active=True).select_related("subject")[:5]
-    )
-    my_chats = ChatRoom.objects.filter(participants=request.user).prefetch_related(
-        "messages"
-    )[:5]
-
-    context = {
-        "my_assignments": my_assignments,
-        "next_assignment": next_assignment,
-        "next_assignment_submission": (
-            submissions.get(next_assignment.pk) if next_assignment else None
-        ),
-        "graded_submissions": graded_submissions,
-        "subject_mastery": subject_mastery,
-        "weekly_effort": weekly_effort,
-        "total_assignments": len(my_assignments),
-        "completed_assignments": completed_count,
-        "completion_rate": (
-            (completed_count / len(my_assignments) * 100)
-            if my_assignments
-            else 0
-        ),
-        "recent_materials": recent_materials,
-        "my_chats": my_chats,
-    }
-
-    return render(request, "dashboard/student.html", context)
 
 
 @login_required

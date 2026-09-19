@@ -9,8 +9,11 @@ from rest_framework.views import APIView
 from chat.models import ChatRoom, Message
 from hub.models import Assignment, Material, StudentProgress
 
+from dashboard.services import build_student_dashboard
+
 from .serializers import (
     AssignmentSerializer,
+    AssignmentSubmissionSerializer,
     MaterialSerializer,
     MessageSerializer,
     ProgressSerializer,
@@ -95,20 +98,23 @@ class DashboardView(ProtectedAPIView):
                 "completion_rate": round(completed / total * 100, 1) if total else 0,
             }
         else:
-            assignments = Assignment.objects.filter(assigned_to=user, is_active=True).select_related("material")
-            progress = StudentProgress.objects.filter(student=user)
-            total_assignments = assignments.count()
-            completed_assignments = progress.filter(completed_at__isnull=False).count()
+            dashboard = build_student_dashboard(user)
             data = {
                 "role": "student",
-                "total_assignments": total_assignments,
-                "completed_assignments": completed_assignments,
-                "completion_rate": round((completed_assignments / total_assignments) * 100, 1) if total_assignments else 0,
+                "total_assignments": dashboard["total_assignments"],
+                "completed_assignments": dashboard["completed_assignments"],
+                "completion_rate": round(dashboard["completion_rate"], 1),
                 "next_assignment": (
-                    AssignmentSerializer(assignments.order_by("due_date").first()).data
-                    if assignments.exists()
+                    AssignmentSerializer(dashboard["next_assignment"]).data
+                    if dashboard["next_assignment"]
                     else None
                 ),
+                "graded_submissions": AssignmentSubmissionSerializer(
+                    dashboard["graded_submissions"],
+                    many=True,
+                ).data,
+                "subject_mastery": dashboard["subject_mastery"],
+                "weekly_effort": dashboard["weekly_effort"],
             }
         return Response(data)
 
