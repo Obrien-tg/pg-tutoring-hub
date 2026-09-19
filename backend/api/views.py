@@ -1,7 +1,11 @@
+from pathlib import Path
+
+from django.conf import settings
 from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Avg, Max, Sum
+from django.http import FileResponse, JsonResponse
 from rest_framework import permissions, status
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.exceptions import AuthenticationFailed
@@ -26,6 +30,16 @@ from .serializers import (
 )
 
 User = get_user_model()
+
+
+def spa_view(request, path=""):
+    index_path = Path(settings.BASE_DIR).parent / "frontend" / "dist" / "index.html"
+    if not index_path.is_file():
+        return JsonResponse(
+            {"detail": "Frontend build is not available."},
+            status=status.HTTP_503_SERVICE_UNAVAILABLE,
+        )
+    return FileResponse(index_path.open("rb"), content_type="text/html")
 
 
 class AuthenticatedOr401(permissions.BasePermission):
