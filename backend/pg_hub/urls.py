@@ -38,6 +38,7 @@ urlpatterns = [
     path("hub/", include("hub.urls")),
     path("chat/", include("chat.urls")),
     path("api/firebase/", include("users.firebase_urls")),
+    path("api/", include("api.urls")),
 ]
 
 # API Documentation

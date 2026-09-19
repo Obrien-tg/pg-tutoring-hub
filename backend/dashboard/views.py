@@ -2,11 +2,11 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
-
-from chat.models import ChatRoom, Message
-from hub.models import Assignment, Material, StudentProgress
+from chat.models import Message
+from hub.models import Assignment, Material
 
 from .forms import AnnouncementForm, CreateAssignmentForm, CreateMaterialForm
+from .services import build_student_dashboard
 
 User = get_user_model()
 
@@ -56,33 +56,15 @@ def teacher_dashboard(request):
 
 @login_required
 def student_dashboard(request):
-    """Dashboard for students"""
+    """Dashboard for students, prioritising the next actionable assignment."""
     if not request.user.is_student:
         return redirect("users:dashboard")
 
-    # Student progress
-    my_assignments = Assignment.objects.filter(assigned_to=request.user)
-    my_progress = StudentProgress.objects.filter(student=request.user)
-    completed_count = my_progress.filter(completed_at__isnull=False).count()
-
-    # Recent activities
-    recent_materials = Material.objects.filter(is_active=True)[:5]
-    my_chats = ChatRoom.objects.filter(participants=request.user)
-
-    context = {
-        "my_assignments": my_assignments,
-        "total_assignments": my_assignments.count(),
-        "completed_assignments": completed_count,
-        "completion_rate": (
-            (completed_count / my_assignments.count() * 100)
-            if my_assignments.count() > 0
-            else 0
-        ),
-        "recent_materials": recent_materials,
-        "my_chats": my_chats,
-    }
-
-    return render(request, "dashboard/student.html", context)
+    return render(
+        request,
+        "dashboard/student.html",
+        build_student_dashboard(request.user),
+    )
 
 
 @login_required

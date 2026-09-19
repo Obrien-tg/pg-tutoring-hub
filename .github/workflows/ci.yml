@@ -55,11 +55,11 @@ jobs:
           SECRET_KEY=ci-secret-key
           DEBUG=True
           ALLOWED_HOSTS=localhost,127.0.0.1
-          DB_NAME=pg_tutoring_ci
-          DB_USER=django
-          DB_PASSWORD=django
-          DB_HOST=127.0.0.1
-          DB_PORT=5432
+          POSTGRES_DB=pg_tutoring_ci
+          POSTGRES_USER=django
+          POSTGRES_PASSWORD=django
+          POSTGRES_HOST=127.0.0.1
+          POSTGRES_PORT=5432
           REDIS_HOST=127.0.0.1
           REDIS_PORT=6379
           SECURE_SSL_REDIRECT=False

@@ -67,6 +67,7 @@ INSTALLED_APPS = [
     # API
     "rest_framework",
     "drf_spectacular",
+    "api",
 ]
 
 MIDDLEWARE = [
@@ -182,7 +183,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Africa/Johannesburg"
 
 USE_I18N = True
 
@@ -224,6 +225,13 @@ AUTHENTICATION_BACKENDS = [
 # Django REST Framework
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.SessionAuthentication",
+        "rest_framework.authentication.BasicAuthentication",
+    ],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ],
 }
 
 # Channels configuration for real-time chat

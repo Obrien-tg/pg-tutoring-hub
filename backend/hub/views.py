@@ -77,7 +77,7 @@ def progress_view(request):
         # Calculate study streak (simplified - consecutive days with activity)
         from datetime import datetime, timedelta
 
-        today = timezone.now().date()
+        today = timezone.localdate()
         study_streak = 0
         for i in range(30):  # Check last 30 days
             check_date = today - timedelta(days=i)
