@@ -1,13 +1,17 @@
 from django.contrib.auth import authenticate, get_user_model, login, logout
+from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.db.models import Avg, Max, Sum
 from rest_framework import permissions, status
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from chat.models import ChatRoom, Message
-from hub.models import Assignment, Material, StudentProgress
+from hub.models import Assignment, AssignmentSubmission, Material, StudentProgress
+from users.firebase_utils import send_submission_notification
 
 from dashboard.services import build_student_dashboard
 
@@ -134,6 +138,66 @@ class AssignmentsView(ProtectedAPIView):
             queryset = Assignment.objects.filter(is_active=True)
         payload = AssignmentSerializer(queryset.select_related("material"), many=True).data
         return Response({"results": payload, "count": len(payload)})
+
+
+class AssignmentSubmissionView(ProtectedAPIView):
+    parser_classes = [MultiPartParser, FormParser]
+
+    def post(self, request, assignment_id):
+        assignment = Assignment.objects.filter(pk=assignment_id).first()
+        if assignment is None:
+            return Response(
+                {"detail": "Assignment not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        if not request.user.is_student or not assignment.assigned_to.filter(
+            pk=request.user.pk
+        ).exists():
+            return Response(
+                {"detail": "You are not authorized to submit this assignment."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        submission_text = str(request.data.get("submission_text", "")).strip()
+        submission_notes = str(request.data.get("submission_notes", "")).strip()
+        submission_file = request.FILES.get("submission_file")
+        if not submission_text and not submission_file:
+            return Response(
+                {"detail": "Provide submission text or a file."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        with transaction.atomic():
+            submission = (
+                AssignmentSubmission.objects.select_for_update()
+                .filter(assignment=assignment, student=request.user)
+                .first()
+            )
+            if submission is None:
+                submission = AssignmentSubmission(
+                    assignment=assignment,
+                    student=request.user,
+                )
+
+            submission.submission_text = submission_text
+            submission.submission_notes = submission_notes
+            if submission_file:
+                submission.submission_file = submission_file
+            submission.status = "submitted"
+            try:
+                submission.save()
+            except ValidationError as exc:
+                return Response(
+                    {"detail": exc.message_dict if hasattr(exc, "message_dict") else exc.messages},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        send_submission_notification(submission)
+        return Response(
+            AssignmentSubmissionSerializer(submission).data,
+            status=status.HTTP_201_CREATED,
+        )
 
 
 class RoomsView(ProtectedAPIView):
