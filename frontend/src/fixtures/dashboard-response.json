@@ -1,0 +1,31 @@
+{
+  "completed_assignments": 0,
+  "completion_rate": 0,
+  "graded_submissions": [],
+  "next_assignment": {
+    "assigned_to": [4],
+    "description": "Solve the worksheet",
+    "due_date": "2026-09-21T23:27:26.571116+02:00",
+    "id": 2,
+    "instructions": "",
+    "is_active": true,
+    "material": 2,
+    "material_title": "Fractions Worksheet",
+    "max_score": 100,
+    "priority": "medium",
+    "submission_format": "",
+    "title": "Complete Fractions"
+  },
+  "role": "student",
+  "subject_mastery": [],
+  "total_assignments": 1,
+  "weekly_effort": [
+    {"date": "2026-09-13", "minutes": 0},
+    {"date": "2026-09-14", "minutes": 0},
+    {"date": "2026-09-15", "minutes": 0},
+    {"date": "2026-09-16", "minutes": 0},
+    {"date": "2026-09-17", "minutes": 0},
+    {"date": "2026-09-18", "minutes": 0},
+    {"date": "2026-09-19", "minutes": 0}
+  ]
+}
