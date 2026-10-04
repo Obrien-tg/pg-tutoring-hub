@@ -16,6 +16,7 @@ class SpaRoutingTests(TestCase):
             password="test-password",
             email="spa@example.com",
             user_type="student",
+            grade_level="5",
         )
         self.client.force_login(user)
 
