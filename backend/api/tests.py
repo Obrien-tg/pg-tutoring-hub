@@ -54,13 +54,13 @@ class MaterialApiTests(TestCase):
         self.teacher = User.objects.create_user(
             username="materials_teacher",
             email="materials-teacher@example.com",
-            ******,
+            password="test-password",
             user_type="teacher",
         )
         self.student = User.objects.create_user(
             username="materials_student",
             email="materials-student@example.com",
-            ******,
+            password="test-password",
             user_type="student",
             grade_level="5",
             parent_email="parent@example.com",
