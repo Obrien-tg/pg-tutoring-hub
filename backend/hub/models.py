@@ -57,7 +57,6 @@ class Subject(models.Model):
             )
 
     def save(self, *args, **kwargs):
-        self.full_clean()
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -194,7 +193,6 @@ class Material(models.Model):
             )
 
     def save(self, *args, **kwargs):
-        self.full_clean()
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -282,7 +280,6 @@ class Assignment(models.Model):
             raise ValidationError({"due_date": "Due date must be in the future."})
 
     def save(self, *args, **kwargs):
-        self.full_clean()
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -407,7 +404,6 @@ class StudentProgress(models.Model):
         elif not self.completed_at and self.status == "completed":
             self.status = "in_progress"
 
-        self.full_clean()
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -547,7 +543,7 @@ class AssignmentSubmission(models.Model):
         if not self.submission_file and not self.submission_text:
             raise ValidationError("Either file upload or text submission is required.")
 
-        if self.numeric_score and not self.grade:
+        if self.numeric_score is not None and not self.grade:
             # Auto-assign letter grade based on numeric score
             if self.numeric_score >= 97:
                 self.grade = "A+"
@@ -584,7 +580,6 @@ class AssignmentSubmission(models.Model):
         if self.revision_requested and self.status != "returned":
             self.status = "returned"
 
-        self.full_clean()
         super().save(*args, **kwargs)
 
     def __str__(self):

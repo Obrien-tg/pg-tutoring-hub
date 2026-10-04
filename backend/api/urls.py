@@ -2,6 +2,7 @@ from django.urls import path
 
 from .views import (
     AssignmentSubmissionView,
+    GradeSubmissionView,
     AssignmentsView,
     csrf_view,
     DashboardView,
@@ -32,6 +33,11 @@ urlpatterns = [
         "assignments/<int:assignment_id>/submissions/",
         AssignmentSubmissionView.as_view(),
         name="assignment-submission",
+    ),
+    path(
+        "submissions/<int:submission_id>/grade/",
+        GradeSubmissionView.as_view(),
+        name="grade-submission",
     ),
     path("chat/rooms/", RoomsView.as_view(), name="rooms"),
     path("chat/rooms/<int:room_id>/messages/", RoomMessagesView.as_view(), name="room-messages"),
