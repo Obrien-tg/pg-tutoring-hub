@@ -138,6 +138,21 @@ class MaterialsView(ProtectedAPIView):
         return Response({"results": payload, "count": len(payload)})
 
 
+class MaterialDetailView(ProtectedAPIView):
+    def get(self, request, material_id):
+        material = (
+            Material.objects.filter(pk=material_id, is_active=True)
+            .select_related("subject")
+            .first()
+        )
+        if material is None:
+            return Response(
+                {"detail": "Material not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        return Response(MaterialSerializer(material).data)
+
+
 class AssignmentsView(ProtectedAPIView):
     def get(self, request):
         if request.user.is_student:

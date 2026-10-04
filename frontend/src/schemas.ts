@@ -26,6 +26,11 @@ export const materialSchema = z.object({
   created_at: z.string(),
 });
 
+export const materialsListSchema = z.object({
+  results: z.array(materialSchema),
+  count: z.number(),
+});
+
 export const assignmentSchema = z.object({
   id: z.number(),
   title: z.string(),

@@ -82,3 +82,62 @@ test("schema mismatches fail before reaching the UI", async () => {
 
   await assert.rejects(() => new ApiClient().getDashboard());
 });
+
+const materialResponse = {
+  id: 7,
+  title: "Fractions practice",
+  description: "Build confidence with fractions.",
+  material_type: "worksheet",
+  subject: 2,
+  subject_name: "Mathematics",
+  difficulty_level: "beginner",
+  grade_level: "5",
+  estimated_time: 20,
+  tags: "fractions, numbers",
+  external_link: "https://example.com/fractions",
+  file_url: null,
+  created_at: "2026-10-01T10:00:00Z",
+};
+
+test("getMaterials validates the list response", async () => {
+  let requestedUrl = "";
+  globalThis.fetch = async (input) => {
+    requestedUrl = String(input);
+    return new Response(JSON.stringify({
+      results: [materialResponse],
+      count: 1,
+    }), { status: 200 });
+  };
+
+  const materials = await new ApiClient().getMaterials();
+
+  assert.equal(requestedUrl, "/api/materials/");
+  assert.equal(materials.count, 1);
+  assert.equal(materials.results[0].title, "Fractions practice");
+});
+
+test("getMaterial validates detail responses", async () => {
+  let requestedUrl = "";
+  globalThis.fetch = async (input) => {
+    requestedUrl = String(input);
+    return new Response(JSON.stringify(materialResponse), { status: 200 });
+  };
+
+  const material = await new ApiClient().getMaterial(7);
+
+  assert.equal(requestedUrl, "/api/materials/7/");
+  assert.equal(material.external_link, "https://example.com/fractions");
+});
+
+test("material 404 responses become ApiError instances", async () => {
+  globalThis.fetch = async () =>
+    new Response(JSON.stringify({ detail: "Material not found." }), { status: 404 });
+
+  await assert.rejects(
+    () => new ApiClient().getMaterial(99999),
+    (error: unknown) =>
+      error instanceof ApiError &&
+      error.status === 404 &&
+      error.message === "Material not found.",
+  );
+});
