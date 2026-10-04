@@ -48,6 +48,82 @@ class ApiAuthenticationTests(TestCase):
         self.assertEqual(self.client.post("/api/auth/logout/", format="json").status_code, 200)
 
 
+class MaterialApiTests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.teacher = User.objects.create_user(
+            username="materials_teacher",
+            email="materials-teacher@example.com",
+            ******,
+            user_type="teacher",
+        )
+        self.student = User.objects.create_user(
+            username="materials_student",
+            email="materials-student@example.com",
+            ******,
+            user_type="student",
+            grade_level="5",
+            parent_email="parent@example.com",
+        )
+        subject = Subject.objects.create(name="Materials Mathematics")
+        self.material = Material.objects.create(
+            title="Fractions practice",
+            description="Build confidence with fractions.",
+            material_type="worksheet",
+            subject=subject,
+            difficulty_level="beginner",
+            grade_level="5",
+            estimated_time=20,
+            uploaded_by=self.teacher,
+            external_link="https://example.com/fractions",
+            file=SimpleUploadedFile("fractions.pdf", b"worksheet"),
+        )
+        self.inactive_material = Material.objects.create(
+            title="Retired worksheet",
+            description="No longer available.",
+            material_type="worksheet",
+            subject=subject,
+            difficulty_level="beginner",
+            grade_level="5",
+            estimated_time=15,
+            uploaded_by=self.teacher,
+            is_active=False,
+        )
+        self.client.force_authenticate(self.student)
+
+    def test_material_list_returns_active_materials(self):
+        response = self.client.get("/api/materials/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIsInstance(response.json()["results"], list)
+        self.assertEqual(response.json()["count"], 1)
+        self.assertEqual(response.json()["results"][0]["id"], self.material.pk)
+
+    def test_material_detail_returns_links_and_matching_fields(self):
+        response = self.client.get(f"/api/materials/{self.material.pk}/")
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertEqual(payload["title"], self.material.title)
+        self.assertEqual(payload["external_link"], self.material.external_link)
+        self.assertTrue(payload["file_url"])
+
+    def test_inactive_or_missing_material_returns_json_404(self):
+        for material_id in (self.inactive_material.pk, 99999):
+            response = self.client.get(f"/api/materials/{material_id}/")
+            self.assertEqual(response.status_code, 404)
+            self.assertEqual(response.json(), {"detail": "Material not found."})
+
+    def test_material_list_requires_authentication(self):
+        self.client.force_authenticate(None)
+
+        response = self.client.get("/api/materials/")
+
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response["Content-Type"], "application/json")
+        self.assertIn("detail", response.json())
+
+
 class AssignmentSubmissionApiTests(TestCase):
     def setUp(self):
         self.client = APIClient()

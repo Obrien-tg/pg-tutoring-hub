@@ -7,6 +7,7 @@ from .views import (
     DashboardView,
     LoginView,
     LogoutView,
+    MaterialDetailView,
     MaterialsView,
     MeView,
     ProgressView,
@@ -21,6 +22,11 @@ urlpatterns = [
     path("auth/me/", MeView.as_view(), name="me"),
     path("dashboard/", DashboardView.as_view(), name="dashboard"),
     path("materials/", MaterialsView.as_view(), name="materials"),
+    path(
+        "materials/<int:material_id>/",
+        MaterialDetailView.as_view(),
+        name="material-detail",
+    ),
     path("assignments/", AssignmentsView.as_view(), name="assignments"),
     path(
         "assignments/<int:assignment_id>/submissions/",

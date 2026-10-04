@@ -2,9 +2,11 @@ import { z } from "zod";
 
 import {
   dashboardSchema,
+  materialSchema,
+  materialsListSchema,
   userSchema,
 } from "./schemas";
-import type { DashboardPayload, User } from "./types";
+import type { DashboardPayload, Material, User } from "./types";
 
 const loginResponseSchema = z.object({
   user: userSchema,
@@ -75,6 +77,14 @@ export class ApiClient {
 
   async getDashboard(): Promise<DashboardPayload> {
     return dashboardSchema.parse(await this.request("/api/dashboard/"));
+  }
+
+  async getMaterials(): Promise<{ results: Material[]; count: number }> {
+    return materialsListSchema.parse(await this.request("/api/materials/"));
+  }
+
+  async getMaterial(id: number): Promise<Material> {
+    return materialSchema.parse(await this.request(`/api/materials/${id}/`));
   }
 
   private async request(path: string, init: RequestInit = {}): Promise<unknown> {
