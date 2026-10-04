@@ -22,6 +22,7 @@ from dashboard.services import build_student_dashboard
 
 from .serializers import (
     AssignmentSerializer,
+    AssignmentDetailSerializer,
     AssignmentSubmissionSerializer,
     MaterialSerializer,
     MessageSerializer,
@@ -163,6 +164,20 @@ class AssignmentsView(ProtectedAPIView):
             queryset = Assignment.objects.filter(is_active=True)
         payload = AssignmentSerializer(queryset.select_related("material"), many=True).data
         return Response({"results": payload, "count": len(payload)})
+
+
+class AssignmentDetailView(ProtectedAPIView):
+    def get(self, request, assignment_id):
+        assignment = Assignment.objects.prefetch_related("submissions").filter(
+            pk=assignment_id, is_active=True
+        ).first()
+        if assignment is None:
+            return Response({"detail": "Assignment not found."}, status=status.HTTP_404_NOT_FOUND)
+        if request.user.is_student and not assignment.assigned_to.filter(pk=request.user.pk).exists():
+            return Response({"detail": "Assignment not found."}, status=status.HTTP_404_NOT_FOUND)
+        if not request.user.is_student and assignment.created_by_id != request.user.id:
+            return Response({"detail": "Assignment not found."}, status=status.HTTP_404_NOT_FOUND)
+        return Response(AssignmentDetailSerializer(assignment, context={"request": request}).data)
 
 
 class AssignmentSubmissionView(ProtectedAPIView):

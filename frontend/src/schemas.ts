@@ -58,6 +58,13 @@ export const submissionSchema = z.object({
   graded_at: z.string().nullable(),
   revision_requested: z.boolean(),
   revision_notes: z.string(),
+  submission_text: z.string().default(""),
+  submission_notes: z.string().default(""),
+  submission_file: z.string().nullable().default(null),
+});
+
+export const assignmentDetailSchema = assignmentSchema.extend({
+  submission: submissionSchema.nullable(),
 });
 
 export const subjectMasterySchema = z.object({

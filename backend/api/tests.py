@@ -281,6 +281,33 @@ class AssignmentSubmissionApiTests(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertFalse(AssignmentSubmission.objects.exists())
 
+    def test_assignment_detail_includes_student_submission(self):
+        submission = AssignmentSubmission.objects.create(
+            assignment=self.assignment,
+            student=self.student,
+            submission_text="My answer",
+        )
+        self.client.force_authenticate(self.student)
+        response = self.client.get(f"/api/assignments/{self.assignment.pk}/")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["id"], self.assignment.pk)
+        self.assertEqual(response.json()["submission"]["id"], submission.pk)
+        self.assertEqual(response.json()["submission"]["submission_text"], "My answer")
+
+    def test_assignment_detail_requires_assignment_access(self):
+        self.client.force_authenticate(self.other_student)
+        response = self.client.get(f"/api/assignments/{self.assignment.pk}/")
+        self.assertEqual(response.status_code, 404)
+
+    def test_protected_assignment_routes_return_json_401(self):
+        for path in (
+            "/api/assignments/",
+            f"/api/assignments/{self.assignment.pk}/",
+        ):
+            response = self.client.get(path)
+            self.assertEqual(response.status_code, 401, path)
+            self.assertIn("detail", response.json())
+
 
 class SubmissionGradingApiTests(TestCase):
     def setUp(self):

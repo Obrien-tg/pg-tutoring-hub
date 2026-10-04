@@ -2,11 +2,14 @@ import { z } from "zod";
 
 import {
   dashboardSchema,
+  assignmentDetailSchema,
+  assignmentSchema,
   materialSchema,
   materialsListSchema,
+  submissionSchema,
   userSchema,
 } from "./schemas";
-import type { DashboardPayload, Material, User } from "./types";
+import type { AssignmentDetail, DashboardPayload, Material, Submission, User } from "./types";
 
 const loginResponseSchema = z.object({
   user: userSchema,
@@ -79,6 +82,31 @@ export class ApiClient {
     return dashboardSchema.parse(await this.request("/api/dashboard/"));
   }
 
+  async getAssignments(): Promise<AssignmentDetail[]> {
+    const response = z.object({ results: z.array(assignmentSchema) }).parse(
+      await this.request("/api/assignments/"),
+    );
+    return response.results.map((assignment) => ({ ...assignment, submission: null }));
+  }
+
+  async getAssignment(id: number): Promise<AssignmentDetail> {
+    return assignmentDetailSchema.parse(await this.request(`/api/assignments/${id}/`));
+  }
+
+  async submitAssignment(
+    id: number,
+    values: { submissionText: string; submissionNotes: string; file?: File },
+  ): Promise<Submission> {
+    const body = new FormData();
+    body.set("submission_text", values.submissionText);
+    body.set("submission_notes", values.submissionNotes);
+    if (values.file) body.set("submission_file", values.file);
+    return submissionSchema.parse(await this.request(`/api/assignments/${id}/submissions/`, {
+      method: "POST",
+      body,
+    }));
+  }
+
   async getMaterials(): Promise<{ results: Material[]; count: number }> {
     return materialsListSchema.parse(await this.request("/api/materials/"));
   }
@@ -91,7 +119,7 @@ export class ApiClient {
     const method = (init.method ?? "GET").toUpperCase();
     const headers = new Headers(init.headers);
     headers.set("Accept", "application/json");
-    if (init.body) {
+    if (init.body && !(init.body instanceof FormData)) {
       headers.set("Content-Type", "application/json");
     }
     if (method !== "GET") {
