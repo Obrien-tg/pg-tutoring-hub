@@ -1,0 +1,15 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <title>PG Tutoring Hub</title>
+    <link rel="stylesheet" href="{% static 'frontend/assets/index.css' %}">
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="{% static 'frontend/assets/index.js' %}"></script>
+  </body>
+</html>

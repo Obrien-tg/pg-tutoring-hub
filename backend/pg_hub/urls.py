@@ -19,8 +19,10 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.http import JsonResponse
-from django.urls import include, path
+from django.urls import include, path, re_path
 from django.views.generic import TemplateView
+
+from core.views import spa_view
 
 urlpatterns = [
     # Configurable admin URL (default 'admin/') configured via settings.ADMIN_URL
@@ -32,6 +34,7 @@ urlpatterns = [
         TemplateView.as_view(template_name="offline.html"),
         name="offline",
     ),
+    path("", spa_view, name="spa-root"),
     path("", include("core.urls")),
     path("users/", include("users.urls")),
     path("dashboard/", include("dashboard.urls")),
@@ -47,6 +50,11 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 urlpatterns += [
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
+    re_path(
+        r"^(?!api/|admin/|static/|media/|healthz|docs/|users/|dashboard/|hub/|chat/|accounts/).*$",
+        spa_view,
+        name="spa",
+    ),
 ]
 
 # Serve media files during development

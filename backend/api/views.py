@@ -2,6 +2,9 @@ from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Avg, Max, Sum
+from django.http import JsonResponse
+from django.middleware.csrf import get_token
+from django.views.decorators.csrf import ensure_csrf_cookie
 from rest_framework import permissions, status
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.exceptions import AuthenticationFailed
@@ -26,6 +29,11 @@ from .serializers import (
 )
 
 User = get_user_model()
+
+
+@ensure_csrf_cookie
+def csrf_view(request):
+    return JsonResponse({"csrfToken": get_token(request)})
 
 
 class AuthenticatedOr401(permissions.BasePermission):

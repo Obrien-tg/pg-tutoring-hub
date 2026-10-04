@@ -9,3 +9,7 @@ def home(request):
         "tagline": "Bringing Education to Your Phone",
     }
     return render(request, "core/home.html", context)
+
+
+def spa_view(request):
+    return render(request, "spa/index.html")
