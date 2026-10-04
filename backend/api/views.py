@@ -276,6 +276,8 @@ class GradeSubmissionView(ProtectedAPIView):
                         submission.numeric_score = (
                             None if raw_score in ("", None) else int(raw_score)
                         )
+                        if "grade" not in request.data:
+                            submission.grade = ""
                     if "teacher_feedback" in request.data:
                         submission.teacher_feedback = str(
                             request.data.get("teacher_feedback") or ""
