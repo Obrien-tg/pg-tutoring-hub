@@ -280,3 +280,141 @@ class AssignmentSubmissionApiTests(TestCase):
 
         self.assertEqual(response.status_code, 400)
         self.assertFalse(AssignmentSubmission.objects.exists())
+
+
+class SubmissionGradingApiTests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.teacher = User.objects.create_user(
+            username="grading_teacher",
+            email="grading-teacher@example.com",
+            password="grading-password",
+            user_type="teacher",
+        )
+        self.other_teacher = User.objects.create_user(
+            username="other_grading_teacher",
+            email="other-grading-teacher@example.com",
+            password="grading-password",
+            user_type="teacher",
+        )
+        self.student = User.objects.create_user(
+            username="grading_student",
+            email="grading-student@example.com",
+            password="grading-password",
+            user_type="student",
+            grade_level="5",
+            parent_email="grading-parent@example.com",
+        )
+        subject = Subject.objects.create(name="Grading Mathematics")
+        material = Material.objects.create(
+            title="Grading worksheet",
+            description="Worksheet for grading tests.",
+            material_type="worksheet",
+            subject=subject,
+            difficulty_level="beginner",
+            grade_level="5",
+            estimated_time=30,
+            uploaded_by=self.teacher,
+            external_link="https://example.com/grading",
+        )
+        assignment = Assignment.objects.create(
+            title="Grade this worksheet",
+            description="Complete the worksheet.",
+            material=material,
+            due_date=timezone.now() + timezone.timedelta(days=2),
+            created_by=self.teacher,
+        )
+        assignment.assigned_to.add(self.student)
+        self.submission = AssignmentSubmission.objects.create(
+            assignment=assignment,
+            student=self.student,
+            submission_text="My completed answers",
+        )
+
+    @patch("api.views.firebase_utils.send_notification_to_user")
+    def test_owner_can_grade_score_only_and_auto_fill_letter(self, notify):
+        self.client.force_authenticate(self.teacher)
+
+        response = self.client.post(
+            f"/api/submissions/{self.submission.pk}/grade/",
+            {"action": "grade", "numeric_score": 85},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.submission.refresh_from_db()
+        self.assertEqual(response.json()["grade"], "B")
+        self.assertEqual(self.submission.status, "graded")
+        self.assertEqual(self.submission.graded_by_id, self.teacher.pk)
+        self.assertFalse(self.submission.revision_requested)
+        self.assertIsNotNone(self.submission.graded_at)
+        notify.assert_called_once()
+        self.assertEqual(notify.call_args.args[0], self.student)
+
+    @patch("api.views.firebase_utils.send_notification_to_user")
+    def test_owner_can_request_revision_with_notes(self, notify):
+        self.client.force_authenticate(self.teacher)
+
+        response = self.client.post(
+            f"/api/submissions/{self.submission.pk}/grade/",
+            {"action": "revision", "revision_notes": "Please show your working."},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.submission.refresh_from_db()
+        self.assertEqual(self.submission.status, "returned")
+        self.assertTrue(self.submission.revision_requested)
+        self.assertEqual(self.submission.revision_notes, "Please show your working.")
+        notify.assert_called_once()
+
+    def test_revision_requires_notes_and_missing_submission_is_404(self):
+        self.client.force_authenticate(self.teacher)
+
+        response = self.client.post(
+            f"/api/submissions/{self.submission.pk}/grade/",
+            {"action": "revision", "revision_notes": "  "},
+            format="json",
+        )
+        self.assertEqual(response.status_code, 400)
+
+        response = self.client.post(
+            "/api/submissions/99999/grade/",
+            {"action": "grade", "numeric_score": 80},
+            format="json",
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_student_and_non_owner_teacher_are_forbidden(self):
+        for user in (self.student, self.other_teacher):
+            self.client.force_authenticate(user)
+            response = self.client.post(
+                f"/api/submissions/{self.submission.pk}/grade/",
+                {"action": "grade", "numeric_score": 80},
+                format="json",
+            )
+            self.assertEqual(response.status_code, 403)
+
+    @patch("api.views.firebase_utils.send_notification_to_user")
+    def test_regrade_updates_submission_in_place(self, notify):
+        self.client.force_authenticate(self.teacher)
+        first = self.client.post(
+            f"/api/submissions/{self.submission.pk}/grade/",
+            {"action": "grade", "numeric_score": 80, "teacher_feedback": "Good start."},
+            format="json",
+        )
+        self.assertEqual(first.status_code, 200)
+
+        second = self.client.post(
+            f"/api/submissions/{self.submission.pk}/grade/",
+            {"action": "grade", "numeric_score": 95, "teacher_feedback": "Excellent work."},
+            format="json",
+        )
+
+        self.assertEqual(second.status_code, 200)
+        self.submission.refresh_from_db()
+        self.assertEqual(AssignmentSubmission.objects.filter(pk=self.submission.pk).count(), 1)
+        self.assertEqual(self.submission.numeric_score, 95)
+        self.assertEqual(self.submission.grade, "A")
+        self.assertEqual(self.submission.teacher_feedback, "Excellent work.")
+        self.assertEqual(notify.call_count, 2)

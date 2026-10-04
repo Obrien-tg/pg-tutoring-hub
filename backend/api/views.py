@@ -5,6 +5,7 @@ from django.db.models import Avg, Max, Sum
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
 from django.views.decorators.csrf import ensure_csrf_cookie
+from django.utils import timezone
 from rest_framework import permissions, status
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.exceptions import AuthenticationFailed
@@ -15,6 +16,7 @@ from rest_framework.views import APIView
 from chat.models import ChatRoom, Message
 from hub.models import Assignment, AssignmentSubmission, Material, StudentProgress
 from users.firebase_utils import send_submission_notification
+from users import firebase_utils
 
 from dashboard.services import build_student_dashboard
 
@@ -209,6 +211,7 @@ class AssignmentSubmissionView(ProtectedAPIView):
                 submission.submission_file = submission_file
             submission.status = "submitted"
             try:
+                submission.full_clean()
                 submission.save()
             except ValidationError as exc:
                 return Response(
@@ -221,6 +224,143 @@ class AssignmentSubmissionView(ProtectedAPIView):
             AssignmentSubmissionSerializer(submission).data,
             status=status.HTTP_201_CREATED,
         )
+
+
+class GradeSubmissionView(ProtectedAPIView):
+    """Allow the teacher who owns an assignment to grade its submission."""
+
+    def post(self, request, submission_id):
+        submission = (
+            AssignmentSubmission.objects.select_related(
+                "assignment", "student", "assignment__created_by"
+            )
+            .filter(pk=submission_id)
+            .first()
+        )
+        if submission is None:
+            return Response(
+                {"detail": "Submission not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        if not request.user.is_teacher:
+            return Response(
+                {"detail": "Only teachers can grade submissions."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        if submission.assignment.created_by_id != request.user.id:
+            return Response(
+                {"detail": "You are not authorized to grade this submission."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        action = str(request.data.get("action", "")).strip().lower()
+        if action not in {"grade", "revision"}:
+            return Response(
+                {"detail": "Action must be either 'grade' or 'revision'."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            with transaction.atomic():
+                submission = (
+                    AssignmentSubmission.objects.select_for_update()
+                    .select_related("assignment", "student")
+                    .get(pk=submission_id)
+                )
+                if action == "grade":
+                    if "grade" in request.data:
+                        submission.grade = str(request.data.get("grade") or "").strip()
+                    if "numeric_score" in request.data:
+                        raw_score = request.data.get("numeric_score")
+                        submission.numeric_score = (
+                            None if raw_score in ("", None) else int(raw_score)
+                        )
+                        if "grade" not in request.data:
+                            submission.grade = ""
+                    if "teacher_feedback" in request.data:
+                        submission.teacher_feedback = str(
+                            request.data.get("teacher_feedback") or ""
+                        ).strip()
+                    if submission.grade == "" and submission.numeric_score is None:
+                        return Response(
+                            {"detail": "Provide a grade or numeric_score."},
+                            status=status.HTTP_400_BAD_REQUEST,
+                        )
+                    submission.revision_requested = False
+                    submission.revision_notes = ""
+                    submission.graded_by = request.user
+                    submission.status = "graded"
+                    submission.graded_at = timezone.now()
+                else:
+                    revision_notes = str(
+                        request.data.get("revision_notes") or ""
+                    ).strip()
+                    if not revision_notes:
+                        return Response(
+                            {"detail": "Revision notes are required."},
+                            status=status.HTTP_400_BAD_REQUEST,
+                        )
+                    submission.revision_requested = True
+                    submission.revision_notes = revision_notes
+                    submission.status = "returned"
+                    submission.graded_by = request.user
+                    if "teacher_feedback" in request.data:
+                        submission.teacher_feedback = str(
+                            request.data.get("teacher_feedback") or ""
+                        ).strip()
+
+                submission.full_clean()
+                submission.save()
+        except (TypeError, ValueError):
+            return Response(
+                {"detail": "numeric_score must be a whole number."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except ValidationError as exc:
+            return Response(
+                {
+                    "detail": (
+                        exc.message_dict
+                        if hasattr(exc, "message_dict")
+                        else exc.messages
+                    )
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if action == "grade":
+            firebase_utils.send_notification_to_user(
+                submission.student,
+                {
+                    "title": "Assignment Graded",
+                    "body": f"Your assignment '{submission.assignment.title}' has been graded",
+                    "icon": "/static/img/assignment-icon.png",
+                },
+                {
+                    "type": "assignment",
+                    "assignment_id": str(submission.assignment_id),
+                    "submission_id": str(submission.id),
+                    "action": "graded",
+                },
+            )
+        else:
+            firebase_utils.send_notification_to_user(
+                submission.student,
+                {
+                    "title": "Revision Requested",
+                    "body": f"Revision requested for '{submission.assignment.title}'",
+                    "icon": "/static/img/assignment-icon.png",
+                },
+                {
+                    "type": "assignment",
+                    "assignment_id": str(submission.assignment_id),
+                    "submission_id": str(submission.id),
+                    "action": "revision",
+                },
+            )
+
+        return Response(AssignmentSubmissionSerializer(submission).data)
 
 
 class RoomsView(ProtectedAPIView):

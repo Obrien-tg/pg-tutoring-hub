@@ -122,6 +122,16 @@ class AssignmentSubmissionTestCase(TestCase):
         self.assertEqual(submission.submission_text, "Here is my text solution")
         self.assertFalse(submission.submission_file)
 
+    def test_overdue_assignment_can_be_updated_and_saved(self):
+        self.assignment.due_date = timezone.now() - timezone.timedelta(days=1)
+        self.assignment.save(update_fields=["due_date"])
+
+        self.assignment.title = "Updated overdue assignment"
+        self.assignment.save()
+
+        self.assignment.refresh_from_db()
+        self.assertEqual(self.assignment.title, "Updated overdue assignment")
+
     def test_submission_validation_requires_content(self):
         """Test that submission requires either text or file"""
         self.client.login(username="student1", password="password123")
