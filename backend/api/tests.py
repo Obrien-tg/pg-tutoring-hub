@@ -108,7 +108,8 @@ class MaterialApiTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIsInstance(response.json()["results"], list)
         self.assertEqual(response.json()["count"], 2)
-        self.assertEqual(response.json()["results"][0]["id"], self.material.pk)
+        result_ids = {item["id"] for item in response.json()["results"]}
+        self.assertEqual(result_ids, {self.material.pk, self.file_material.pk})
 
     def test_material_detail_returns_links_and_matching_fields(self):
         response = self.client.get(f"/api/materials/{self.material.pk}/")
