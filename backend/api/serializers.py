@@ -45,6 +45,20 @@ class AssignmentSerializer(serializers.ModelSerializer):
         )
 
 
+class AssignmentDetailSerializer(AssignmentSerializer):
+    submission = serializers.SerializerMethodField()
+
+    class Meta(AssignmentSerializer.Meta):
+        fields = AssignmentSerializer.Meta.fields + ("submission",)
+
+    def get_submission(self, obj):
+        request = self.context.get("request")
+        if not request or not request.user.is_authenticated:
+            return None
+        submission = obj.submissions.filter(student=request.user).first()
+        return AssignmentSubmissionSerializer(submission).data if submission else None
+
+
 class AssignmentSubmissionSerializer(serializers.ModelSerializer):
     assignment_title = serializers.CharField(
         source="assignment.title",
@@ -65,6 +79,9 @@ class AssignmentSubmissionSerializer(serializers.ModelSerializer):
             "graded_at",
             "revision_requested",
             "revision_notes",
+            "submission_text",
+            "submission_notes",
+            "submission_file",
         )
 
 

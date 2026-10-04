@@ -53,6 +53,13 @@ export interface Submission {
   graded_at: string | null;
   revision_requested: boolean;
   revision_notes: string;
+  submission_text: string;
+  submission_notes: string;
+  submission_file: string | null;
+}
+
+export interface AssignmentDetail extends Assignment {
+  submission: Submission | null;
 }
 
 export interface SubjectMastery {

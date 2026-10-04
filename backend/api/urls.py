@@ -4,6 +4,7 @@ from .views import (
     AssignmentSubmissionView,
     GradeSubmissionView,
     AssignmentsView,
+    AssignmentDetailView,
     csrf_view,
     DashboardView,
     LoginView,
@@ -29,6 +30,7 @@ urlpatterns = [
         name="material-detail",
     ),
     path("assignments/", AssignmentsView.as_view(), name="assignments"),
+    path("assignments/<int:assignment_id>/", AssignmentDetailView.as_view(), name="assignment-detail"),
     path(
         "assignments/<int:assignment_id>/submissions/",
         AssignmentSubmissionView.as_view(),
