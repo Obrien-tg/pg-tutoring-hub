@@ -32,6 +32,9 @@ jobs:
       - name: Test contract
         run: npm test
 
+      - name: Build frontend
+        run: npm run build
+
   test:
     runs-on: ubuntu-latest
     services:

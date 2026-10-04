@@ -1,0 +1,30 @@
+@import "tailwindcss";
+
+@theme {
+  --color-cream: #fffdf8;
+  --color-surface: #ffffff;
+  --color-ink: #243b4a;
+  --color-ink-soft: #5a6f7d;
+  --color-mint-100: #d5f5e8;
+  --color-mint-300: #7dd9bb;
+  --color-mint-500: #2fa98c;
+  --color-mint-600: #1b7a5f;
+  --color-mint-700: #176b57;
+  --color-peach-100: #ffe5d9;
+  --color-peach-500: #f08a4b;
+  --color-coral-100: #ffccc7;
+  --color-coral-500: #e56960;
+  --color-coral-600: #d94840;
+  --color-border: #e8d5c8;
+  --font-display: Poppins, sans-serif;
+  --font-body: Nunito, sans-serif;
+}
+
+body {
+  @apply m-0 min-w-80 bg-cream font-body text-ink;
+}
+
+button,
+input {
+  font: inherit;
+}
