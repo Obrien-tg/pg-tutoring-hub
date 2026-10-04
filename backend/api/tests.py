@@ -97,6 +97,7 @@ class MaterialApiTests(TestCase):
             grade_level="5",
             estimated_time=15,
             uploaded_by=self.teacher,
+            external_link="https://example.com/retired",
             is_active=False,
         )
         self.client.force_authenticate(self.student)
