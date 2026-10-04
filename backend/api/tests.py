@@ -76,6 +76,16 @@ class MaterialApiTests(TestCase):
             estimated_time=20,
             uploaded_by=self.teacher,
             external_link="https://example.com/fractions",
+        )
+        self.file_material = Material.objects.create(
+            title="Fractions worksheet file",
+            description="Practise with a downloadable worksheet.",
+            material_type="worksheet",
+            subject=subject,
+            difficulty_level="beginner",
+            grade_level="5",
+            estimated_time=20,
+            uploaded_by=self.teacher,
             file=SimpleUploadedFile("fractions.pdf", b"worksheet"),
         )
         self.inactive_material = Material.objects.create(
@@ -96,7 +106,7 @@ class MaterialApiTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertIsInstance(response.json()["results"], list)
-        self.assertEqual(response.json()["count"], 1)
+        self.assertEqual(response.json()["count"], 2)
         self.assertEqual(response.json()["results"][0]["id"], self.material.pk)
 
     def test_material_detail_returns_links_and_matching_fields(self):
@@ -106,7 +116,12 @@ class MaterialApiTests(TestCase):
         payload = response.json()
         self.assertEqual(payload["title"], self.material.title)
         self.assertEqual(payload["external_link"], self.material.external_link)
-        self.assertTrue(payload["file_url"])
+        self.assertIsNone(payload["file_url"])
+
+        file_response = self.client.get(f"/api/materials/{self.file_material.pk}/")
+        self.assertEqual(file_response.status_code, 200)
+        self.assertTrue(file_response.json()["file_url"])
+        self.assertEqual(file_response.json()["external_link"], "")
 
     def test_inactive_or_missing_material_returns_json_404(self):
         for material_id in (self.inactive_material.pk, 99999):
