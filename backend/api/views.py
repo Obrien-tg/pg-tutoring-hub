@@ -1,7 +1,7 @@
 from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.db.models import Avg, Max, Sum
+from django.db.models import Avg, Count, Max, Prefetch, Sum
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
 from django.views.decorators.csrf import ensure_csrf_cookie
@@ -202,6 +202,11 @@ class AssignmentSubmissionView(ProtectedAPIView):
         submission_text = str(request.data.get("submission_text", "")).strip()
         submission_notes = str(request.data.get("submission_notes", "")).strip()
         submission_file = request.FILES.get("submission_file")
+        if submission_file and submission_file.size > 10 * 1024 * 1024:
+            return Response(
+                {"detail": "Submission files must be 10 MB or smaller."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         if not submission_text and not submission_file:
             return Response(
                 {"detail": "Provide submission text or a file."},
@@ -380,7 +385,19 @@ class GradeSubmissionView(ProtectedAPIView):
 
 class RoomsView(ProtectedAPIView):
     def get(self, request):
-        rooms = ChatRoom.objects.filter(participants=request.user).prefetch_related("participants", "messages")
+        latest_messages = Message.objects.select_related("sender").order_by(
+            "-timestamp", "-pk"
+        )[:1]
+        rooms = ChatRoom.objects.filter(
+            participants=request.user
+        ).prefetch_related(
+            "participants",
+            Prefetch(
+                "messages",
+                queryset=latest_messages,
+                to_attr="prefetched_latest_messages",
+            ),
+        )
         payload = RoomSerializer(rooms, many=True).data
         return Response({"results": payload, "count": len(payload)})
 
@@ -392,6 +409,58 @@ class RoomsView(ProtectedAPIView):
         room = ChatRoom.objects.create(name=name, created_by=request.user)
         room.participants.add(request.user)
         return Response(RoomSerializer(room).data, status=status.HTTP_201_CREATED)
+
+
+class TeacherChatView(ProtectedAPIView):
+    def post(self, request):
+        if request.user.user_type != "student":
+            return Response(
+                {"detail": "Only students can open a teacher chat."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        teacher = (
+            User.objects.filter(user_type="teacher", is_active=True)
+            .order_by("id")
+            .first()
+        )
+        if teacher is None:
+            return Response(
+                {"detail": "No active teacher is available."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        with transaction.atomic():
+            student = User.objects.select_for_update().get(pk=request.user.pk)
+            candidate_room_ids = (
+                ChatRoom.objects.filter(
+                    is_group_chat=False,
+                    participants=student,
+                )
+                .filter(participants=teacher)
+                .values("pk")
+            )
+            room = (
+                ChatRoom.objects.filter(pk__in=candidate_room_ids)
+                .annotate(
+                    participant_count=Count("participants", distinct=True)
+                )
+                .filter(participant_count=2)
+                .first()
+            )
+            created = room is None
+            if created:
+                room = ChatRoom.objects.create(
+                    name=f"Chat with {teacher.get_full_name() or teacher.username}",
+                    is_group_chat=False,
+                    created_by=student,
+                )
+                room.participants.add(student, teacher)
+
+        return Response(
+            RoomSerializer(room).data,
+            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
+        )
 
 
 class RoomMessagesView(ProtectedAPIView):

@@ -15,6 +15,11 @@ def validate_file_size(file):
         raise ValidationError(f"File too large ( > {limit_mb}MB )")
 
 
+def validate_submission_file_size(file):
+    if file.file.size > 10 * 1024 * 1024:
+        raise ValidationError("File too large ( > 10MB )")
+
+
 def material_upload_path(instance, filename):
     """Generate organized upload path for materials"""
     # Get file extension
@@ -480,12 +485,12 @@ class AssignmentSubmission(models.Model):
         blank=True,
         null=True,
         validators=[
-            validate_file_size,
+            validate_submission_file_size,
             FileExtensionValidator(
                 allowed_extensions=["pdf", "doc", "docx", "jpg", "jpeg", "png", "txt"]
             ),
         ],
-        help_text="Upload your completed assignment (max 50MB)",
+        help_text="Upload your completed assignment (max 10MB)",
     )
     submission_text = models.TextField(
         blank=True, help_text="Type your answer here if no file upload needed"

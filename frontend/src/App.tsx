@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { useMemo, useState } from "react";
 import { Link, Navigate, Route, Routes, useNavigate, useParams } from "react-router-dom";
@@ -7,7 +7,14 @@ import type { FormEvent, ReactNode } from "react";
 import { z } from "zod";
 
 import { ApiClient, ApiError } from "./api";
-import type { AssignmentDetail, Material, StudentDashboardPayload, User } from "./types";
+import type {
+  AssignmentDetail,
+  ChatMessage,
+  ChatRoom,
+  Material,
+  StudentDashboardPayload,
+  User,
+} from "./types";
 
 const api = new ApiClient();
 const loginSchema = z.object({
@@ -25,6 +32,8 @@ export function App() {
       <Route path="/materials/:id" element={<RequireAuth><MaterialDetailPage /></RequireAuth>} />
       <Route path="/assignments" element={<RequireAuth><AssignmentsPage /></RequireAuth>} />
       <Route path="/assignments/:id" element={<RequireAuth><AssignmentDetailPage /></RequireAuth>} />
+      <Route path="/chat" element={<RequireAuth><ChatPage /></RequireAuth>} />
+      <Route path="/chat/:roomId" element={<RequireAuth><ChatPage /></RequireAuth>} />
       <Route path="/" element={<HomeRedirect />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
@@ -127,7 +136,7 @@ function AssignmentsPage() {
   return <main className="min-h-screen"><Header user={null} /><div className="mx-auto max-w-6xl space-y-6 p-6">
     <p className="font-display text-sm font-bold uppercase tracking-widest text-mint-600">Your work</p>
     <h1 className="font-display text-4xl font-bold">Assignments</h1>
-    {query.data.length === 0 ? <EmptyState text="No assignments yet." /> : <div className="grid gap-5 md:grid-cols-2">
+    {query.data.length === 0 ? <EmptyState text="Nothing to hand in right now — enjoy the breather!" /> : <div className="grid gap-5 md:grid-cols-2">
       {query.data.map((assignment) => <Link key={assignment.id} to={`/assignments/${assignment.id}`} className="rounded-3xl border border-border bg-surface p-6 hover:shadow-lg">
         <p className="text-sm font-bold uppercase text-mint-600">{assignment.priority}</p><h2 className="mt-2 font-display text-xl font-bold">{assignment.title}</h2>
         <p className="mt-2 text-ink-soft">{assignment.description}</p><p className="mt-4 text-sm">Due {formatDueDate(assignment.due_date)}</p>
@@ -152,7 +161,7 @@ function AssignmentDetailPage() {
     <article className="rounded-3xl bg-surface p-8"><p className="font-display text-sm font-bold uppercase text-mint-600">Assignment</p><h1 className="mt-2 font-display text-4xl font-bold">{assignment.title}</h1><p className="mt-4 text-ink-soft">{assignment.description}</p><p className="mt-3 text-sm">Due {formatDueDate(assignment.due_date)} · {assignment.max_score} points</p>
     {assignment.instructions && <div className="mt-6 rounded-xl bg-mint-100 p-4"><strong>Instructions</strong><p>{assignment.instructions}</p></div>}
     {assignment.submission && <div className="mt-6 rounded-xl bg-peach-100 p-4"><strong>Latest submission: {assignment.submission.status}</strong>{assignment.submission.grade && <p>Grade: {assignment.submission.grade} {assignment.submission.numeric_score != null && `(${assignment.submission.numeric_score}%)`}</p>}{assignment.submission.teacher_feedback && <p>{assignment.submission.teacher_feedback}</p>}{assignment.submission.revision_requested && <p className="mt-2 text-coral-600">{assignment.submission.revision_notes}</p>}</div>}
-    <form onSubmit={submit} className="mt-6 grid gap-4"><h2 className="font-display text-2xl font-bold">{assignment.submission ? "Resubmit your work" : "Submit your work"}</h2>{message && <p role="status" className="rounded-xl bg-mint-100 p-3">{message}</p>}<label className="grid gap-1 font-bold">Your answer<textarea className="rounded-xl border border-border p-3" rows={6} value={text} onChange={(event) => setText(event.target.value)} /></label><label className="grid gap-1 font-bold">Notes<textarea className="rounded-xl border border-border p-3" rows={3} value={notes} onChange={(event) => setNotes(event.target.value)} /></label><label className="grid gap-1 font-bold">Attach a file<input type="file" onChange={(event) => setFile(event.target.files?.[0])} /></label><button className="rounded-xl bg-mint-600 px-5 py-3 font-bold text-white" disabled={saving}>{saving ? "Submitting..." : assignment.submission ? "Resubmit assignment" : "Submit assignment"}</button></form></article>
+    <form onSubmit={submit} className="mt-6 grid gap-4"><h2 className="font-display text-2xl font-bold">{assignment.submission ? "Resubmit your work" : "Submit your work"}</h2>{message && <p role="status" className="rounded-xl bg-mint-100 p-3">{message}</p>}<label className="grid gap-1 font-bold">Your answer<textarea className="rounded-xl border border-border p-3" rows={6} value={text} onChange={(event) => setText(event.target.value)} /></label><label className="grid gap-1 font-bold">Notes<textarea className="rounded-xl border border-border p-3" rows={3} value={notes} onChange={(event) => setNotes(event.target.value)} /></label><label className="grid gap-1 font-bold">Attach a file <span className="text-sm font-normal text-ink-soft">Max 10 MB</span><input type="file" onChange={(event) => setFile(event.target.files?.[0])} /></label><button className="rounded-xl bg-mint-600 px-5 py-3 font-bold text-white" disabled={saving}>{saving ? "Submitting..." : assignment.submission ? "Resubmit assignment" : "Submit assignment"}</button></form></article>
   </div></main>;
 }
 
@@ -266,11 +275,160 @@ function MaterialDetailPage() {
   );
 }
 
+function ChatPage() {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { roomId } = useParams();
+  const selectedRoomId = roomId ? Number(roomId) : undefined;
+  const roomsQuery = useQuery({
+    queryKey: ["chat-rooms"],
+    queryFn: () => api.getRooms(),
+  });
+  const messagesQuery = useQuery({
+    queryKey: ["chat-messages", selectedRoomId],
+    queryFn: () => api.getMessages(selectedRoomId!),
+    enabled: Number.isInteger(selectedRoomId),
+    refetchInterval: selectedRoomId ? 5000 : false,
+  });
+  const openTeacherMutation = useMutation({
+    mutationFn: () => api.openTeacherChat(),
+    onSuccess: (room) => {
+      queryClient.invalidateQueries({ queryKey: ["chat-rooms"] });
+      navigate(`/chat/${room.id}`);
+    },
+  });
+  const sendMessageMutation = useMutation({
+    mutationFn: (content: string) => api.sendMessage(selectedRoomId!, content),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["chat-messages", selectedRoomId] });
+      queryClient.invalidateQueries({ queryKey: ["chat-rooms"] });
+    },
+  });
+  const selectedRoom = roomsQuery.data?.results.find((room) => room.id === selectedRoomId);
+
+  if (roomsQuery.isPending) return <LoadingState />;
+  if (roomsQuery.isError) return <EmptyState text="We couldn't load your chats. Please try again." />;
+
+  return (
+    <main className="min-h-screen">
+      <Header user={null} />
+      <div className="mx-auto grid max-w-6xl gap-6 p-6 lg:grid-cols-[18rem_1fr]">
+        <section className="rounded-3xl border border-border bg-surface p-5">
+          <div className="flex items-center justify-between gap-3">
+            <h1 className="font-display text-2xl font-bold">Chat</h1>
+            <button
+              className="rounded-xl bg-mint-600 px-3 py-2 text-sm font-bold text-white disabled:opacity-60"
+              onClick={() => openTeacherMutation.mutate()}
+              disabled={openTeacherMutation.isPending}
+            >
+              Message teacher
+            </button>
+          </div>
+          <p className="mt-2 text-sm text-ink-soft">A friendly place to ask, share, and keep going.</p>
+          <div className="mt-5 grid gap-2">
+            {roomsQuery.data.results.length === 0 ? (
+              <EmptyState text="No conversations yet. Your teacher is ready when you are." />
+            ) : (
+              roomsQuery.data.results.map((room) => (
+                <Link
+                  key={room.id}
+                  to={`/chat/${room.id}`}
+                  className={`rounded-2xl p-3 ${room.id === selectedRoomId ? "bg-mint-100" : "hover:bg-cream"}`}
+                >
+                  <p className="font-bold">{room.name}</p>
+                  <p className="mt-1 truncate text-sm text-ink-soft">
+                    {room.latest_message?.content || "No messages yet"}
+                  </p>
+                </Link>
+              ))
+            )}
+          </div>
+        </section>
+        <section className="flex min-h-[32rem] flex-col rounded-3xl border border-border bg-surface p-5">
+          {!selectedRoom ? (
+            <div className="grid flex-1 place-items-center text-center">
+              <div>
+                <h2 className="font-display text-2xl font-bold">Choose a conversation</h2>
+                <p className="mt-2 text-ink-soft">You don&apos;t have to figure everything out alone.</p>
+              </div>
+            </div>
+          ) : (
+            <ChatThread
+              room={selectedRoom}
+              messages={messagesQuery.data?.results ?? []}
+              isLoading={messagesQuery.isPending}
+              isSending={sendMessageMutation.isPending}
+              onSend={(content) => sendMessageMutation.mutate(content)}
+            />
+          )}
+        </section>
+      </div>
+    </main>
+  );
+}
+
+function ChatThread({
+  room,
+  messages,
+  isLoading,
+  isSending,
+  onSend,
+}: {
+  room: ChatRoom;
+  messages: ChatMessage[];
+  isLoading: boolean;
+  isSending: boolean;
+  onSend: (content: string) => void;
+}) {
+  const [content, setContent] = useState("");
+  function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const trimmed = content.trim();
+    if (!trimmed) return;
+    onSend(trimmed);
+    setContent("");
+  }
+  return (
+    <>
+      <div className="border-b border-border pb-4">
+        <h2 className="font-display text-2xl font-bold">{room.name}</h2>
+        <p className="mt-1 text-sm text-ink-soft">Messages refresh while this conversation is open.</p>
+      </div>
+      <div className="flex flex-1 flex-col gap-3 overflow-y-auto py-5">
+        {isLoading ? (
+          <LoadingState />
+        ) : messages.length === 0 ? (
+          <EmptyState text="No messages yet. Say hello and start the conversation." />
+        ) : (
+          messages.map((message) => (
+            <article key={message.id} className="max-w-[85%] rounded-2xl bg-mint-100 p-3">
+              <p className="text-xs font-bold text-mint-700">{message.sender_username}</p>
+              <p className="mt-1 whitespace-pre-wrap">{message.content}</p>
+            </article>
+          ))
+        )}
+      </div>
+      <form onSubmit={submit} className="flex gap-2 border-t border-border pt-4">
+        <input
+          className="min-w-0 flex-1 rounded-xl border border-border px-3 py-3"
+          value={content}
+          onChange={(event) => setContent(event.target.value)}
+          placeholder="Write a message..."
+          aria-label="Message"
+        />
+        <button className="rounded-xl bg-mint-600 px-4 py-3 font-bold text-white disabled:opacity-60" disabled={isSending}>
+          Send
+        </button>
+      </form>
+    </>
+  );
+}
+
 function NotFoundMaterial() {
   return <main className="grid min-h-screen place-items-center p-6"><section className="text-center"><h1 className="font-display text-3xl font-bold">We couldn&apos;t find that material.</h1><Link to="/materials" className="mt-4 inline-block font-bold text-mint-600">Back to materials</Link></section></main>;
 }
 
-function Header({ user }: { user: User | null }) { return <header className="flex flex-wrap items-center justify-between gap-4 border-b border-border bg-surface px-6 py-4"><Link to="/dashboard" className="font-display font-bold text-mint-600">PG Tutoring Hub</Link><nav className="flex items-center gap-4 font-bold"><Link to="/dashboard" className="hover:text-mint-600">Dashboard</Link><Link to="/assignments" className="hover:text-mint-600">Assignments</Link><Link to="/materials" className="hover:text-mint-600">Materials</Link>{user && <span className="text-ink-soft">{user.full_name || user.username}</span>}</nav></header>; }
+function Header({ user }: { user: User | null }) { return <header className="flex flex-wrap items-center justify-between gap-4 border-b border-border bg-surface px-6 py-4"><Link to="/dashboard" className="font-display font-bold text-mint-600">PG Tutoring Hub</Link><nav className="flex items-center gap-4 font-bold"><Link to="/dashboard" className="hover:text-mint-600">Dashboard</Link><Link to="/assignments" className="hover:text-mint-600">Assignments</Link><Link to="/materials" className="hover:text-mint-600">Materials</Link><Link to="/chat" className="hover:text-mint-600">Chat</Link>{user && <span className="text-ink-soft">{user.full_name || user.username}</span>}</nav></header>; }
 function Panel({ title, children }: { title: string; children: ReactNode }) { return <section className="rounded-3xl border border-border bg-surface p-6"><h2 className="mb-4 font-display text-xl font-bold">{title}</h2>{children}</section>; }
 function EmptyState({ text }: { text: string }) { return <p className="text-ink-soft">{text}</p>; }
 function LoadingState() { return <main className="grid min-h-screen place-items-center text-ink-soft" aria-label="Loading">Getting your learning space ready...</main>; }
