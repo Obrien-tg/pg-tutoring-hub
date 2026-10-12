@@ -10,6 +10,14 @@ export interface User {
   full_name: string;
 }
 
+export interface ParentChildLink {
+  id: number;
+  student: number;
+  student_name: string;
+  student_email: string;
+  is_active: boolean;
+}
+
 export interface Material {
   id: number;
   title: string;

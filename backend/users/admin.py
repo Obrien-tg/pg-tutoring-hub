@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import CustomUser, FirebaseToken
+from .models import CustomUser, FirebaseToken, ParentChildLink
 
 
 @admin.register(CustomUser)
@@ -22,3 +22,17 @@ class FirebaseTokenAdmin(admin.ModelAdmin):
     list_display = ("user", "device_info", "is_active", "created_at", "updated_at")
     list_filter = ("is_active", "created_at")
     search_fields = ("user__username", "user__email", "token")
+
+
+@admin.register(ParentChildLink)
+class ParentChildLinkAdmin(admin.ModelAdmin):
+    list_display = ("parent", "student", "is_active", "created_at")
+    list_filter = ("is_active", "created_at")
+    search_fields = (
+        "parent__email",
+        "parent__username",
+        "student__email",
+        "student__username",
+    )
+    raw_id_fields = ("parent", "student")
+    date_hierarchy = "created_at"
