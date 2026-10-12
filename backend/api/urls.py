@@ -15,6 +15,7 @@ from .views import (
     ProgressView,
     RoomMessagesView,
     RoomsView,
+    TeacherChatView,
 )
 
 urlpatterns = [
@@ -42,6 +43,7 @@ urlpatterns = [
         name="grade-submission",
     ),
     path("chat/rooms/", RoomsView.as_view(), name="rooms"),
+    path("chat/rooms/with-teacher/", TeacherChatView.as_view(), name="teacher-chat"),
     path("chat/rooms/<int:room_id>/messages/", RoomMessagesView.as_view(), name="room-messages"),
     path("progress/", ProgressView.as_view(), name="progress"),
 ]

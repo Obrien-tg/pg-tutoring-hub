@@ -6,6 +6,7 @@ from django.test import TestCase
 from django.utils import timezone
 from rest_framework.test import APIClient
 
+from chat.models import ChatRoom, Message
 from hub.models import Assignment, AssignmentSubmission, Material, Subject
 
 User = get_user_model()
@@ -281,6 +282,23 @@ class AssignmentSubmissionApiTests(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertFalse(AssignmentSubmission.objects.exists())
 
+    def test_submission_file_over_10mb_is_rejected(self):
+        self.client.force_authenticate(self.student)
+        response = self.client.post(
+            f"/api/assignments/{self.assignment.pk}/submissions/",
+            {
+                "submission_file": SimpleUploadedFile(
+                    "work.pdf",
+                    b"x" * (10 * 1024 * 1024 + 1),
+                    content_type="application/pdf",
+                )
+            },
+            format="multipart",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(AssignmentSubmission.objects.exists())
+
     def test_assignment_detail_includes_student_submission(self):
         submission = AssignmentSubmission.objects.create(
             assignment=self.assignment,
@@ -422,6 +440,7 @@ class SubmissionGradingApiTests(TestCase):
             )
             self.assertEqual(response.status_code, 403)
 
+
     @patch("api.views.firebase_utils.send_notification_to_user")
     def test_regrade_updates_submission_in_place(self, notify):
         self.client.force_authenticate(self.teacher)
@@ -445,3 +464,80 @@ class SubmissionGradingApiTests(TestCase):
         self.assertEqual(self.submission.grade, "A")
         self.assertEqual(self.submission.teacher_feedback, "Excellent work.")
         self.assertEqual(notify.call_count, 2)
+
+
+class ChatApiTests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.teacher = User.objects.create_user(
+            username="chat_teacher",
+            email="chat-teacher@example.com",
+            password="test-password",
+            user_type="teacher",
+        )
+        self.student = User.objects.create_user(
+            username="chat_student",
+            email="chat-student@example.com",
+            password="test-password",
+            user_type="student",
+        )
+        self.other_student = User.objects.create_user(
+            username="chat_other",
+            email="chat-other@example.com",
+            password="test-password",
+            user_type="student",
+        )
+
+    def test_student_opens_and_reuses_teacher_chat(self):
+        self.client.force_authenticate(self.student)
+        created = self.client.post("/api/chat/rooms/with-teacher/", {}, format="json")
+        reused = self.client.post("/api/chat/rooms/with-teacher/", {}, format="json")
+
+        self.assertEqual(created.status_code, 201)
+        self.assertEqual(reused.status_code, 200)
+        self.assertEqual(created.json()["id"], reused.json()["id"])
+        self.assertEqual(ChatRoom.objects.count(), 1)
+        self.assertEqual(ChatRoom.objects.get().participants.count(), 2)
+
+    def test_teacher_chat_requires_student_role(self):
+        self.client.force_authenticate(self.teacher)
+        response = self.client.post("/api/chat/rooms/with-teacher/", {}, format="json")
+        self.assertEqual(response.status_code, 403)
+
+    def test_teacher_chat_returns_404_without_active_teacher(self):
+        self.teacher.is_active = False
+        self.teacher.save(update_fields=["is_active"])
+        self.client.force_authenticate(self.student)
+        response = self.client.post("/api/chat/rooms/with-teacher/", {}, format="json")
+        self.assertEqual(response.status_code, 404)
+
+    def test_chat_messages_are_scoped_to_participants(self):
+        room = ChatRoom.objects.create(
+            name="Private chat",
+            created_by=self.student,
+            is_group_chat=False,
+        )
+        room.participants.add(self.student, self.teacher)
+        Message.objects.create(room=room, sender=self.teacher, content="Welcome")
+
+        self.client.force_authenticate(self.other_student)
+        response = self.client.get(f"/api/chat/rooms/{room.pk}/messages/")
+        self.assertEqual(response.status_code, 404)
+
+    def test_room_list_returns_newest_latest_message(self):
+        room = ChatRoom.objects.create(
+            name="Latest message",
+            created_by=self.student,
+            is_group_chat=False,
+        )
+        room.participants.add(self.student, self.teacher)
+        Message.objects.create(room=room, sender=self.student, content="Older")
+        Message.objects.create(room=room, sender=self.teacher, content="Newest")
+
+        self.client.force_authenticate(self.student)
+        response = self.client.get("/api/chat/rooms/")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json()["results"][0]["latest_message"]["content"],
+            "Newest",
+        )

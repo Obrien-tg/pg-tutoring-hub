@@ -128,6 +128,16 @@ export interface ChatRoom {
   latest_message: ChatMessage | null;
 }
 
+export interface RoomsList {
+  results: ChatRoom[];
+  count: number;
+}
+
+export interface MessagesList {
+  results: ChatMessage[];
+  count: number;
+}
+
 export interface ProgressRecord {
   id: number;
   material: number;

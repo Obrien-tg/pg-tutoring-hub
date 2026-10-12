@@ -134,6 +134,16 @@ export const chatRoomSchema = z.object({
   latest_message: chatMessageSchema.nullable(),
 });
 
+export const roomsListSchema = z.object({
+  results: z.array(chatRoomSchema),
+  count: z.number(),
+});
+
+export const messagesListSchema = z.object({
+  results: z.array(chatMessageSchema),
+  count: z.number(),
+});
+
 export const progressRecordSchema = z.object({
   id: z.number(),
   material: z.number(),

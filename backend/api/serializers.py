@@ -106,7 +106,11 @@ class RoomSerializer(serializers.ModelSerializer):
         fields = ("id", "name", "participants", "is_group_chat", "created_by", "created_at", "latest_message")
 
     def get_latest_message(self, obj):
-        message = obj.latest_message
+        prefetched = getattr(obj, "prefetched_latest_messages", None)
+        if prefetched is not None:
+            message = prefetched[0] if prefetched else None
+        else:
+            message = obj.latest_message
         return MessageSerializer(message).data if message else None
 
 

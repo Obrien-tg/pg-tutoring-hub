@@ -2,6 +2,10 @@ import { z } from "zod";
 
 import {
   dashboardSchema,
+  chatMessageSchema,
+  chatRoomSchema,
+  messagesListSchema,
+  roomsListSchema,
   assignmentDetailSchema,
   assignmentSchema,
   materialSchema,
@@ -9,7 +13,17 @@ import {
   submissionSchema,
   userSchema,
 } from "./schemas";
-import type { AssignmentDetail, DashboardPayload, Material, Submission, User } from "./types";
+import type {
+  AssignmentDetail,
+  ChatMessage,
+  ChatRoom,
+  DashboardPayload,
+  Material,
+  MessagesList,
+  RoomsList,
+  Submission,
+  User,
+} from "./types";
 
 const loginResponseSchema = z.object({
   user: userSchema,
@@ -113,6 +127,34 @@ export class ApiClient {
 
   async getMaterial(id: number): Promise<Material> {
     return materialSchema.parse(await this.request(`/api/materials/${id}/`));
+  }
+
+  async getRooms(): Promise<RoomsList> {
+    return roomsListSchema.parse(await this.request("/api/chat/rooms/"));
+  }
+
+  async openTeacherChat(): Promise<ChatRoom> {
+    return chatRoomSchema.parse(
+      await this.request("/api/chat/rooms/with-teacher/", {
+        method: "POST",
+        body: JSON.stringify({}),
+      }),
+    );
+  }
+
+  async getMessages(roomId: number): Promise<MessagesList> {
+    return messagesListSchema.parse(
+      await this.request(`/api/chat/rooms/${roomId}/messages/`),
+    );
+  }
+
+  async sendMessage(roomId: number, content: string): Promise<ChatMessage> {
+    return chatMessageSchema.parse(
+      await this.request(`/api/chat/rooms/${roomId}/messages/`, {
+        method: "POST",
+        body: JSON.stringify({ content }),
+      }),
+    );
   }
 
   private async request(path: string, init: RequestInit = {}): Promise<unknown> {
