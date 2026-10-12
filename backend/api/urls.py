@@ -13,6 +13,7 @@ from .views import (
     MaterialsView,
     MeView,
     ParentChildrenListView,
+    ParentChildProgressView,
     PasswordResetView,
     ProgressView,
     RoomMessagesView,
@@ -50,4 +51,9 @@ urlpatterns = [
     path("chat/rooms/<int:room_id>/messages/", RoomMessagesView.as_view(), name="room-messages"),
     path("progress/", ProgressView.as_view(), name="progress"),
     path("parent/children/", ParentChildrenListView.as_view(), name="parent-children"),
+    path(
+        "parent/children/<int:student_id>/progress/",
+        ParentChildProgressView.as_view(),
+        name="parent-child-progress",
+    ),
 ]

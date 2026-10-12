@@ -1,4 +1,5 @@
 from unittest.mock import patch
+from datetime import timedelta
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -11,6 +12,7 @@ from rest_framework.test import APIClient
 
 from chat.models import ChatRoom, Message
 from hub.models import Assignment, AssignmentSubmission, Material, Subject
+from users.models import ParentChildLink
 
 User = get_user_model()
 
@@ -75,6 +77,82 @@ class EmailApiTests(TestCase):
             self.assertTrue(test_file.exists())
         finally:
             test_file.unlink(missing_ok=True)
+
+
+class ParentDashboardApiTests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.parent = User.objects.create_user(
+            username="dashboard_parent",
+            email="dashboard-parent@example.com",
+            password="test-password",
+            user_type="parent",
+        )
+        self.student = User.objects.create_user(
+            username="dashboard_student",
+            email="dashboard-student@example.com",
+            password="test-password",
+            user_type="student",
+            grade_level="5",
+            parent_email="dashboard-parent@example.com",
+        )
+        self.teacher = User.objects.create_user(
+            username="dashboard_teacher",
+            email="dashboard-teacher@example.com",
+            password="test-password",
+            user_type="teacher",
+        )
+
+    def test_parent_dashboard_uses_linked_children_and_is_aggregated(self):
+        ParentChildLink.objects.create(parent=self.parent, student=self.student)
+        subject = Subject.objects.create(name="Dashboard Maths")
+        material = Material.objects.create(
+            title="Fractions",
+            description="Practice",
+            material_type="worksheet",
+            subject=subject,
+            difficulty_level="beginner",
+            external_link="https://example.com/fractions",
+            grade_level="5",
+            estimated_time=30,
+            uploaded_by=self.teacher,
+        )
+        assignment = Assignment.objects.create(
+            title="Fractions task",
+            description="Complete the task",
+            material=material,
+            due_date=timezone.now() + timedelta(days=2),
+            created_by=self.teacher,
+        )
+        assignment.assigned_to.add(self.student)
+
+        self.client.force_authenticate(self.parent)
+        response = self.client.get("/api/dashboard/")
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertEqual(payload["children"][0]["id"], self.student.id)
+        self.assertEqual(payload["children"][0]["total_assignments"], 1)
+        self.assertEqual(payload["total_assignments"], 1)
+        self.assertEqual(payload["completed_assignments"], 0)
+
+    def test_parent_without_links_has_empty_dashboard(self):
+        self.client.force_authenticate(self.parent)
+
+        payload = self.client.get("/api/dashboard/").json()
+
+        self.assertEqual(payload["children"], [])
+        self.assertEqual(payload["completion_rate"], 0)
+
+    def test_non_parent_cannot_read_parent_dashboard_or_progress(self):
+        self.client.force_authenticate(self.student)
+        self.assertEqual(self.client.get("/api/dashboard/").status_code, 200)
+        self.assertEqual(self.client.get("/api/parent/children/").status_code, 403)
+        self.assertEqual(self.client.get("/api/progress/").status_code, 200)
+
+        self.client.force_authenticate(self.teacher)
+        self.assertEqual(self.client.get("/api/parent/children/").status_code, 403)
+        self.assertEqual(self.client.get("/api/progress/").status_code, 403)
 
 
 class ApiAuthenticationTests(TestCase):

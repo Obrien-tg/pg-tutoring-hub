@@ -100,7 +100,19 @@ export const teacherDashboardSchema = z.object({
 
 export const parentDashboardSchema = z.object({
   role: z.literal("parent"),
-  children: z.array(userSchema),
+  children: z.array(z.object({
+    id: z.number(),
+    student_name: z.string(),
+    student_email: z.string(),
+    total_assignments: z.number(),
+    completed_assignments: z.number(),
+    completion_rate: z.number(),
+    recent_grades: z.array(z.object({
+      assignment_title: z.string(),
+      grade: z.string(),
+      numeric_score: z.number().nullable(),
+    })),
+  })),
   total_assignments: z.number(),
   completed_assignments: z.number(),
   completion_rate: z.number(),

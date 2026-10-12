@@ -12,6 +12,8 @@ import type {
   ChatMessage,
   ChatRoom,
   Material,
+  ParentDashboardPayload,
+  ProgressSummary,
   StudentDashboardPayload,
   User,
 } from "./types";
@@ -28,6 +30,7 @@ export function App() {
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/dashboard" element={<RequireAuth><DashboardPage /></RequireAuth>} />
+      <Route path="/progress" element={<RequireAuth><ProgressPage /></RequireAuth>} />
       <Route path="/materials" element={<RequireAuth><MaterialsPage /></RequireAuth>} />
       <Route path="/materials/:id" element={<RequireAuth><MaterialDetailPage /></RequireAuth>} />
       <Route path="/assignments" element={<RequireAuth><AssignmentsPage /></RequireAuth>} />
@@ -104,10 +107,145 @@ function DashboardPage() {
   const query = useQuery({ queryKey: ["dashboard"], queryFn: () => api.getDashboard() });
   if (query.isPending) return <LoadingState />;
   if (query.isError) return <main className="grid min-h-screen place-items-center">We couldn&apos;t load your dashboard. Please try again.</main>;
+  if (query.data.role === "parent") {
+    return <ParentDashboard dashboard={query.data} user={userQuery.data ?? null} />;
+  }
   if (query.data.role !== "student") {
     return <main className="mx-auto max-w-3xl p-6"><Header user={userQuery.data ?? null} /><section className="mt-12 rounded-3xl bg-surface p-8"><p className="font-display font-bold uppercase tracking-widest text-mint-600">Coming soon</p><h1 className="mt-2 font-display text-3xl font-bold">Your dashboard is being built.</h1><p className="mt-3 text-ink-soft">We&apos;re preparing a helpful space for you.</p></section></main>;
   }
+
+  function ParentDashboard({ dashboard, user }: { dashboard: ParentDashboardPayload; user: User | null }) {
+    return (
+      <main className="min-h-screen">
+        <Header user={user} />
+        <div className="mx-auto max-w-6xl space-y-6 p-6">
+          <section className="rounded-3xl bg-peach-100 p-6">
+            <p className="font-display text-sm font-bold uppercase tracking-widest text-peach-500">Family learning space</p>
+            <h1 className="mt-2 font-display text-4xl font-bold">Let&apos;s see how your learners are doing.</h1>
+            <p className="mt-2 text-ink-soft">{dashboard.completed_assignments} of {dashboard.total_assignments} assignments completed.</p>
+          </section>
+          {dashboard.children.length === 0 ? (
+            <EmptyState text="No learners linked yet. Your teacher can connect you in the admin." />
+          ) : (
+            <div className="grid gap-6 md:grid-cols-2">
+              {dashboard.children.map((child) => (
+                <section className="rounded-3xl border border-border bg-surface p-6" key={child.id}>
+                  <h2 className="font-display text-2xl font-bold">{child.student_name}</h2>
+                  <p className="mt-1 text-sm text-ink-soft">{child.student_email}</p>
+                  <div className="mt-5 flex items-center justify-between">
+                    <span className="font-bold">Completion</span>
+                    <span className="rounded-full bg-mint-100 px-3 py-1 font-bold text-mint-700">{child.completion_rate}%</span>
+                  </div>
+                  <div className="mt-2 h-3 overflow-hidden rounded-full bg-mint-100">
+                    <span className="block h-full rounded-full bg-mint-600" style={{ width: `${Math.min(child.completion_rate, 100)}%` }} />
+                  </div>
+                  <h3 className="mt-6 font-display text-lg font-bold">Recent marks</h3>
+                  {child.recent_grades.length === 0 ? (
+                    <p className="mt-2 text-sm text-ink-soft">Marks will appear here after work is graded.</p>
+                  ) : (
+                    <ul className="mt-2 space-y-2">
+                      {child.recent_grades.map((grade, index) => (
+                        <li className="flex justify-between gap-4 border-b border-border py-2 last:border-0" key={`${grade.assignment_title}-${index}`}>
+                          <span>{grade.assignment_title}</span>
+                          <strong>{grade.grade || `${grade.numeric_score ?? 0}%`}</strong>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </section>
+              ))}
+            </div>
+          )}
+        </div>
+      </main>
+    );
+  }
+
+  function ProgressPage() {
+    const query = useQuery({ queryKey: ["progress"], queryFn: () => api.getProgress(), retry: false });
+    if (query.isPending) return <LoadingState />;
+    if (query.isError) return <main className="grid min-h-screen place-items-center">Progress is available for student accounts.</main>;
+    return <StudentProgressPage progress={query.data} />;
+  }
+
+  function StudentProgressPage({ progress }: { progress: ProgressSummary }) {
+    return (
+      <main className="min-h-screen">
+        <Header user={null} />
+        <div className="mx-auto max-w-5xl space-y-6 p-6">
+          <section className="rounded-3xl bg-peach-100 p-6">
+            <p className="font-display text-sm font-bold uppercase tracking-widest text-peach-500">Your progress</p>
+            <h1 className="mt-2 font-display text-4xl font-bold">Small steps add up.</h1>
+            <div className="mt-5 grid gap-3 sm:grid-cols-3">
+              <Metric label="Completion" value={`${progress.overall_completion}%`} />
+              <Metric label="Average score" value={`${progress.average_score}%`} />
+              <Metric label="Study time" value={`${progress.total_study_time} min`} />
+            </div>
+          </section>
+          <section className="rounded-3xl border border-border bg-surface p-6">
+            <h2 className="font-display text-2xl font-bold">Recent learning records</h2>
+            {progress.records.length === 0 ? (
+              <p className="mt-3 text-ink-soft">Your learning records will appear here as you work.</p>
+            ) : (
+              <div className="mt-4 space-y-3">
+                {progress.records.map((record) => (
+                  <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border py-3 last:border-0" key={record.id}>
+                    <div><p className="font-bold">{record.material_title}</p><p className="text-sm text-ink-soft">{record.status.replace("_", " ")}</p></div>
+                    <span className="rounded-full bg-mint-100 px-3 py-1 font-bold text-mint-700">{record.score === null ? `${record.completion_percentage}%` : `${record.score}%`}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        </div>
+      </main>
+    );
+  }
+
+  function Metric({ label, value }: { label: string; value: string }) {
+    return <div className="rounded-2xl bg-surface p-4"><p className="text-sm text-ink-soft">{label}</p><p className="mt-1 font-display text-2xl font-bold">{value}</p></div>;
+  }
   return <StudentDashboard dashboard={query.data} user={userQuery.data ?? null} />;
+}
+
+function ParentDashboardPage({ dashboard, user }: { dashboard: ParentDashboardPayload; user: User | null }) {
+  return (
+    <main className="min-h-screen">
+      <Header user={user} />
+      <div className="mx-auto max-w-6xl space-y-6 p-6">
+        <section className="rounded-3xl bg-peach-100 p-6">
+          <p className="font-display text-sm font-bold uppercase tracking-widest text-peach-500">Family learning space</p>
+          <h1 className="mt-2 font-display text-4xl font-bold">Let&apos;s see how your learners are doing.</h1>
+          <p className="mt-2 text-ink-soft">{dashboard.completed_assignments} of {dashboard.total_assignments} assignments completed.</p>
+        </section>
+        {dashboard.children.length === 0 ? <EmptyState text="No learners linked yet. Your teacher can connect you in the admin." /> : (
+          <div className="grid gap-6 md:grid-cols-2">
+            {dashboard.children.map((child) => (
+              <section className="rounded-3xl border border-border bg-surface p-6" key={child.id}>
+                <h2 className="font-display text-2xl font-bold">{child.student_name}</h2>
+                <p className="mt-1 text-sm text-ink-soft">{child.student_email}</p>
+                <p className="mt-5 font-bold">{child.completion_rate}% complete</p>
+                <div className="mt-2 h-3 overflow-hidden rounded-full bg-mint-100"><span className="block h-full rounded-full bg-mint-600" style={{ width: `${Math.min(child.completion_rate, 100)}%` }} /></div>
+                <h3 className="mt-6 font-display text-lg font-bold">Recent marks</h3>
+                {child.recent_grades.length ? child.recent_grades.map((grade, index) => <p className="flex justify-between border-b border-border py-2 last:border-0" key={`${grade.assignment_title}-${index}`}><span>{grade.assignment_title}</span><strong>{grade.grade || `${grade.numeric_score ?? 0}%`}</strong></p>) : <p className="mt-2 text-sm text-ink-soft">Marks will appear here after work is graded.</p>}
+              </section>
+            ))}
+          </div>
+        )}
+      </div>
+    </main>
+  );
+}
+
+function ProgressPage() {
+  const query = useQuery({ queryKey: ["progress"], queryFn: () => api.getProgress(), retry: false });
+  if (query.isPending) return <LoadingState />;
+  if (query.isError) return <main className="grid min-h-screen place-items-center">Progress is available for student accounts.</main>;
+  return <main className="min-h-screen"><Header user={null} /><div className="mx-auto max-w-5xl space-y-6 p-6"><section className="rounded-3xl bg-peach-100 p-6"><p className="font-display text-sm font-bold uppercase tracking-widest text-peach-500">Your progress</p><h1 className="mt-2 font-display text-4xl font-bold">Small steps add up.</h1><div className="mt-5 grid gap-3 sm:grid-cols-3"><Metric label="Completion" value={`${query.data.overall_completion}%`} /><Metric label="Average score" value={`${query.data.average_score}%`} /><Metric label="Study time" value={`${query.data.total_study_time} min`} /></div></section><section className="rounded-3xl border border-border bg-surface p-6"><h2 className="font-display text-2xl font-bold">Recent learning records</h2>{query.data.records.length ? query.data.records.map((record) => <p className="flex justify-between border-b border-border py-3 last:border-0" key={record.id}><span><strong>{record.material_title}</strong><small className="ml-3 text-ink-soft">{record.status.replace("_", " ")}</small></span><strong>{record.score === null ? `${record.completion_percentage}%` : `${record.score}%`}</strong></p>) : <p className="mt-3 text-ink-soft">Your learning records will appear here as you work.</p>}</section></div></main>;
+}
+
+function Metric({ label, value }: { label: string; value: string }) {
+  return <div className="rounded-2xl bg-surface p-4"><p className="text-sm text-ink-soft">{label}</p><p className="mt-1 font-display text-2xl font-bold">{value}</p></div>;
 }
 
 function StudentDashboard({ dashboard, user }: { dashboard: StudentDashboardPayload; user: User | null }) {
@@ -428,7 +566,7 @@ function NotFoundMaterial() {
   return <main className="grid min-h-screen place-items-center p-6"><section className="text-center"><h1 className="font-display text-3xl font-bold">We couldn&apos;t find that material.</h1><Link to="/materials" className="mt-4 inline-block font-bold text-mint-600">Back to materials</Link></section></main>;
 }
 
-function Header({ user }: { user: User | null }) { return <header className="flex flex-wrap items-center justify-between gap-4 border-b border-border bg-surface px-6 py-4"><Link to="/dashboard" className="font-display font-bold text-mint-600">PG Tutoring Hub</Link><nav className="flex items-center gap-4 font-bold"><Link to="/dashboard" className="hover:text-mint-600">Dashboard</Link><Link to="/assignments" className="hover:text-mint-600">Assignments</Link><Link to="/materials" className="hover:text-mint-600">Materials</Link><Link to="/chat" className="hover:text-mint-600">Chat</Link>{user && <span className="text-ink-soft">{user.full_name || user.username}</span>}</nav></header>; }
+function Header({ user }: { user: User | null }) { return <header className="flex flex-wrap items-center justify-between gap-4 border-b border-border bg-surface px-6 py-4"><Link to="/dashboard" className="font-display font-bold text-mint-600">PG Tutoring Hub</Link><nav className="flex items-center gap-4 font-bold"><Link to="/dashboard" className="hover:text-mint-600">Dashboard</Link><Link to="/assignments" className="hover:text-mint-600">Assignments</Link><Link to="/materials" className="hover:text-mint-600">Materials</Link>{user?.user_type === "student" && <Link to="/progress" className="hover:text-mint-600">Progress</Link>}<Link to="/chat" className="hover:text-mint-600">Chat</Link>{user && <span className="text-ink-soft">{user.full_name || user.username}</span>}</nav></header>; }
 function Panel({ title, children }: { title: string; children: ReactNode }) { return <section className="rounded-3xl border border-border bg-surface p-6"><h2 className="mb-4 font-display text-xl font-bold">{title}</h2>{children}</section>; }
 function EmptyState({ text }: { text: string }) { return <p className="text-ink-soft">{text}</p>; }
 function LoadingState() { return <main className="grid min-h-screen place-items-center text-ink-soft" aria-label="Loading">Getting your learning space ready...</main>; }
