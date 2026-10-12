@@ -7,6 +7,7 @@ from django.utils import timezone
 from rest_framework.test import APIClient
 
 from hub.models import Assignment, AssignmentSubmission, Material, Subject
+from chat.models import ChatRoom, Message
 
 User = get_user_model()
 
@@ -187,3 +188,114 @@ class AssignmentSubmissionApiTests(TestCase):
 
         self.assertEqual(response.status_code, 400)
         self.assertFalse(AssignmentSubmission.objects.exists())
+
+
+class ChatApiTests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.teacher = User.objects.create_user(
+            username="chat_teacher",
+            email="chat-teacher@example.com",
+            password="test-password",
+            user_type="teacher",
+        )
+        self.student = User.objects.create_user(
+            username="chat_student",
+            email="chat-student@example.com",
+            password="test-password",
+            user_type="student",
+            grade_level="5",
+            parent_email="parent@example.com",
+        )
+        self.other_student = User.objects.create_user(
+            username="other_chat_student",
+            email="other-chat-student@example.com",
+            password="test-password",
+            user_type="student",
+            grade_level="5",
+            parent_email="parent@example.com",
+        )
+
+    def test_rooms_are_participant_scoped(self):
+        room = ChatRoom.objects.create(name="Private", created_by=self.student)
+        room.participants.add(self.student)
+        other_room = ChatRoom.objects.create(name="Other", created_by=self.other_student)
+        other_room.participants.add(self.other_student)
+        self.client.force_authenticate(self.student)
+
+        response = self.client.get("/api/chat/rooms/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual([item["id"] for item in response.json()["results"]], [room.pk])
+        self.assertNotIn(other_room.pk, [item["id"] for item in response.json()["results"]])
+
+    def test_with_teacher_creates_and_reuses_dm(self):
+        self.client.force_authenticate(self.student)
+
+        first = self.client.post("/api/chat/rooms/with-teacher/", format="json")
+        second = self.client.post("/api/chat/rooms/with-teacher/", format="json")
+
+        self.assertEqual(first.status_code, 201)
+        self.assertEqual(second.status_code, 200)
+        self.assertEqual(first.json()["id"], second.json()["id"])
+        room = ChatRoom.objects.get(pk=first.json()["id"])
+        self.assertQuerySetEqual(
+            room.participants.order_by("pk"),
+            [self.teacher, self.student],
+            transform=lambda user: user,
+        )
+
+    def test_with_teacher_uses_lowest_active_teacher_id(self):
+        earlier = User.objects.create_user(
+            username="earlier_teacher",
+            password="test-password",
+            user_type="teacher",
+        )
+        self.client.force_authenticate(self.student)
+
+        response = self.client.post("/api/chat/rooms/with-teacher/", format="json")
+
+        self.assertEqual(response.status_code, 201)
+        self.assertIn(self.teacher.username, response.json()["name"])
+
+    def test_messages_validate_access_and_content(self):
+        room = ChatRoom.objects.create(name="Private", created_by=self.student)
+        room.participants.add(self.student, self.teacher)
+        self.client.force_authenticate(self.student)
+
+        created = self.client.post(
+            f"/api/chat/rooms/{room.pk}/messages/",
+            {"content": " Hello "},
+            format="json",
+        )
+        empty = self.client.post(
+            f"/api/chat/rooms/{room.pk}/messages/",
+            {"content": "  "},
+            format="json",
+        )
+        self.client.force_authenticate(self.other_student)
+        forbidden = self.client.get(f"/api/chat/rooms/{room.pk}/messages/")
+
+        self.assertEqual(created.status_code, 201)
+        self.assertEqual(created.json()["content"], "Hello")
+        self.assertEqual(empty.status_code, 400)
+        self.assertEqual(forbidden.status_code, 404)
+
+    def test_room_list_returns_newest_message(self):
+        room = ChatRoom.objects.create(name="Updates", created_by=self.student)
+        room.participants.add(self.student)
+        older = Message.objects.create(room=room, sender=self.student, content="Older")
+        newest = Message.objects.create(room=room, sender=self.student, content="Newest")
+        Message.objects.filter(pk=older.pk).update(
+            timestamp=timezone.now() - timezone.timedelta(minutes=1)
+        )
+        self.client.force_authenticate(self.student)
+
+        response = self.client.get("/api/chat/rooms/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["results"][0]["latest_message"]["id"], newest.pk)
+
+    def test_chat_requires_authentication(self):
+        self.assertEqual(self.client.get("/api/chat/rooms/").status_code, 401)
+        self.assertEqual(self.client.post("/api/chat/rooms/with-teacher/").status_code, 401)

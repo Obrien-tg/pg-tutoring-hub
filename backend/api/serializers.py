@@ -89,7 +89,7 @@ class RoomSerializer(serializers.ModelSerializer):
         fields = ("id", "name", "participants", "is_group_chat", "created_by", "created_at", "latest_message")
 
     def get_latest_message(self, obj):
-        message = obj.latest_message
+        message = obj.messages.order_by("-timestamp", "-pk").first()
         return MessageSerializer(message).data if message else None
 
 

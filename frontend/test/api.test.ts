@@ -82,3 +82,69 @@ test("schema mismatches fail before reaching the UI", async () => {
 
   await assert.rejects(() => new ApiClient().getDashboard());
 });
+
+const chatRoom = {
+  id: 4,
+  name: "Chat with Teacher",
+  participants: [1, 2],
+  is_group_chat: false,
+  created_by: 1,
+  created_at: "2026-10-12T10:00:00Z",
+  latest_message: null,
+};
+
+test("chat methods validate list and message responses", async () => {
+  const requests: string[] = [];
+  globalThis.fetch = async (input, init) => {
+    requests.push(`${init?.method ?? "GET"} ${String(input)}`);
+    const path = String(input);
+    if (path.endsWith("/with-teacher/")) {
+      return new Response(JSON.stringify(chatRoom), { status: 201 });
+    }
+    if (path.endsWith("/messages/") && init?.method === "POST") {
+      return new Response(JSON.stringify({
+        id: 8,
+        room: 4,
+        sender: 1,
+        sender_username: "ada",
+        message_type: "text",
+        content: "Hello",
+        file: null,
+        timestamp: "2026-10-12T10:01:00Z",
+        is_read: false,
+      }), { status: 201 });
+    }
+    if (path.endsWith("/messages/")) {
+      return new Response(JSON.stringify({ results: [], count: 0 }), { status: 200 });
+    }
+    return new Response(JSON.stringify({ results: [chatRoom], count: 1 }), { status: 200 });
+  };
+
+  const client = new ApiClient();
+  assert.equal((await client.getRooms()).count, 1);
+  assert.equal((await client.openTeacherChat()).id, 4);
+  assert.equal((await client.getMessages(4)).count, 0);
+  assert.equal((await client.sendMessage(4, "Hello")).content, "Hello");
+  assert.deepEqual(requests, [
+    "GET /api/chat/rooms/",
+    "POST /api/chat/rooms/with-teacher/",
+    "GET /api/chat/rooms/4/messages/",
+    "POST /api/chat/rooms/4/messages/",
+  ]);
+});
+
+test("chat methods preserve 401 and 404 API errors", async () => {
+  let status = 404;
+  globalThis.fetch = async () =>
+    new Response(JSON.stringify({ detail: "Chat room not found." }), { status });
+
+  await assert.rejects(
+    () => new ApiClient().getMessages(99),
+    (error: unknown) => error instanceof ApiError && error.status === 404,
+  );
+  status = 401;
+  await assert.rejects(
+    () => new ApiClient().getRooms(),
+    (error: unknown) => error instanceof ApiError && error.status === 401,
+  );
+});

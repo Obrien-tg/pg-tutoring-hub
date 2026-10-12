@@ -4,7 +4,7 @@ from django.conf import settings
 from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.db.models import Avg, Max, Sum
+from django.db.models import Avg, Count, Max, Sum
 from django.http import FileResponse, JsonResponse
 from rest_framework import permissions, status
 from rest_framework.authentication import SessionAuthentication
@@ -227,6 +227,45 @@ class RoomsView(ProtectedAPIView):
 
         room = ChatRoom.objects.create(name=name, created_by=request.user)
         room.participants.add(request.user)
+        return Response(RoomSerializer(room).data, status=status.HTTP_201_CREATED)
+
+
+class TeacherChatView(ProtectedAPIView):
+    def post(self, request):
+        if not request.user.is_student:
+            return Response(
+                {"detail": "Only students can open a teacher chat."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        teacher = (
+            User.objects.filter(user_type="teacher", is_active=True)
+            .order_by("id")
+            .first()
+        )
+        if teacher is None:
+            return Response(
+                {"detail": "No teacher is available yet."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        room = (
+            ChatRoom.objects.filter(
+                is_group_chat=False,
+                participants__in=[request.user, teacher],
+            )
+            .annotate(participant_count=Count("participants", distinct=True))
+            .filter(participant_count=2)
+            .first()
+        )
+        if room is not None:
+            return Response(RoomSerializer(room).data)
+
+        room = ChatRoom.objects.create(
+            name=f"Chat with {teacher.first_name or teacher.username}",
+            created_by=request.user,
+        )
+        room.participants.add(request.user, teacher)
         return Response(RoomSerializer(room).data, status=status.HTTP_201_CREATED)
 
 

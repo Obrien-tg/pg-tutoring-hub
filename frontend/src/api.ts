@@ -1,10 +1,14 @@
 import { z } from "zod";
 
 import {
+  chatMessageSchema,
+  chatRoomSchema,
   dashboardSchema,
+  messagesListSchema,
+  roomsListSchema,
   userSchema,
 } from "./schemas";
-import type { DashboardPayload, User } from "./types";
+import type { ChatMessage, ChatRoom, DashboardPayload, MessagesList, RoomsList, User } from "./types";
 
 const loginResponseSchema = z.object({
   user: userSchema,
@@ -43,12 +47,49 @@ export class ApiClient {
     return dashboardSchema.parse(await this.request("/api/dashboard/"));
   }
 
+  async getRooms(): Promise<RoomsList> {
+    return roomsListSchema.parse(await this.request("/api/chat/rooms/"));
+  }
+
+  async openTeacherChat(): Promise<ChatRoom> {
+    return chatRoomSchema.parse(
+      await this.request("/api/chat/rooms/with-teacher/", {
+        method: "POST",
+        body: JSON.stringify({}),
+      }),
+    );
+  }
+
+  async getMessages(roomId: number): Promise<MessagesList> {
+    return messagesListSchema.parse(
+      await this.request(`/api/chat/rooms/${roomId}/messages/`),
+    );
+  }
+
+  async sendMessage(roomId: number, content: string): Promise<ChatMessage> {
+    return chatMessageSchema.parse(
+      await this.request(`/api/chat/rooms/${roomId}/messages/`, {
+        method: "POST",
+        body: JSON.stringify({ content }),
+      }),
+    );
+  }
+
   private async request(path: string, init: RequestInit = {}): Promise<unknown> {
+    const method = init.method?.toUpperCase() ?? "GET";
+    const csrfToken =
+      typeof document === "undefined"
+        ? undefined
+        : document.cookie
+            .split("; ")
+            .find((cookie) => cookie.startsWith("csrftoken="))
+            ?.split("=")[1];
     const response = await fetch(`${this.baseUrl}${path}`, {
       credentials: "include",
       headers: {
         Accept: "application/json",
         ...(init.body ? { "Content-Type": "application/json" } : {}),
+        ...(method !== "GET" && csrfToken ? { "X-CSRFToken": decodeURIComponent(csrfToken) } : {}),
         ...init.headers,
       },
       ...init,
