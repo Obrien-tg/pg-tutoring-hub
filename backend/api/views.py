@@ -202,6 +202,11 @@ class AssignmentSubmissionView(ProtectedAPIView):
         submission_text = str(request.data.get("submission_text", "")).strip()
         submission_notes = str(request.data.get("submission_notes", "")).strip()
         submission_file = request.FILES.get("submission_file")
+        if submission_file and submission_file.size > 10 * 1024 * 1024:
+            return Response(
+                {"detail": "Submission files must be 10 MB or smaller."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         if not submission_text and not submission_file:
             return Response(
                 {"detail": "Provide submission text or a file."},
