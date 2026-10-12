@@ -1,8 +1,11 @@
 from unittest.mock import patch
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import TestCase
+from django.core import mail
+from django.test import TestCase, override_settings
 from django.utils import timezone
 from rest_framework.test import APIClient
 
@@ -10,6 +13,68 @@ from chat.models import ChatRoom, Message
 from hub.models import Assignment, AssignmentSubmission, Material, Subject
 
 User = get_user_model()
+
+
+@override_settings(
+    CACHES={
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "api-email-tests",
+        }
+    }
+)
+class EmailApiTests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        cache.clear()
+        self.user = User.objects.create_user(
+            username="reset_user",
+            email="reset@example.com",
+            password="test-password",
+            user_type="student",
+        )
+
+    def test_password_reset_existing_user_sends_email(self):
+        response = self.client.post(
+            "/api/auth/password/reset/",
+            {"email": self.user.email},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(mail.outbox), 1)
+
+    def test_password_reset_unknown_user_does_not_send_email(self):
+        response = self.client.post(
+            "/api/auth/password/reset/",
+            {"email": "missing@example.com"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_password_reset_is_rate_limited(self):
+        responses = [
+            self.client.post(
+                "/api/auth/password/reset/",
+                {"email": self.user.email},
+                format="json",
+            )
+            for _ in range(6)
+        ]
+
+        self.assertEqual([response.status_code for response in responses[:5]], [200] * 5)
+        self.assertEqual(responses[5].status_code, 429)
+
+    def test_media_root_is_writable(self):
+        settings.MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
+        test_file = settings.MEDIA_ROOT / "write_test.txt"
+        try:
+            test_file.write_text("ok")
+            self.assertTrue(test_file.exists())
+        finally:
+            test_file.unlink(missing_ok=True)
 
 
 class ApiAuthenticationTests(TestCase):

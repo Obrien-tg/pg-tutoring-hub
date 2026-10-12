@@ -40,6 +40,7 @@ urlpatterns = [
     path("dashboard/", include("dashboard.urls")),
     path("hub/", include("hub.urls")),
     path("chat/", include("chat.urls")),
+    path("accounts/", include("django.contrib.auth.urls")),
     path("api/firebase/", include("users.firebase_urls")),
     path("api/", include("api.urls")),
 ]
