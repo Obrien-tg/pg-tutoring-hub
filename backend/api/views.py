@@ -34,7 +34,7 @@ from .serializers import (
     RoomSerializer,
     UserSerializer,
 )
-from .permissions import IsParentUser
+from .permissions import IsParentUser, IsStudentUser
 
 User = get_user_model()
 
@@ -141,15 +141,55 @@ class DashboardView(ProtectedAPIView):
                 "total_assignments": Assignment.objects.filter(created_by=user).count(),
             }
         elif user.is_parent:
-            children = User.objects.filter(parent_email=user.email, user_type="student")
-            total = sum(Assignment.objects.filter(assigned_to=child).count() for child in children)
-            completed = sum(
-                StudentProgress.objects.filter(student=child, completed_at__isnull=False).count()
-                for child in children
+            links = (
+                ParentChildLink.objects.filter(parent=user, is_active=True)
+                .select_related("student")
             )
+            children = []
+            total = completed = 0
+            for link in links:
+                child = link.student
+                assignments = Assignment.objects.filter(
+                    assigned_to=child,
+                    is_active=True,
+                )
+                child_total = assignments.count()
+                child_completed = StudentProgress.objects.filter(
+                    student=child,
+                    assignment__in=assignments,
+                    completed_at__isnull=False,
+                ).count()
+                recent_grades = AssignmentSubmission.objects.filter(
+                    student=child,
+                    status="graded",
+                ).select_related("assignment").order_by("-graded_at", "-pk")[:5]
+                children.append(
+                    {
+                        "id": child.id,
+                        "student_name": child.full_name,
+                        "student_email": child.email or "",
+                        "total_assignments": child_total,
+                        "completed_assignments": child_completed,
+                        "completion_rate": (
+                            round(child_completed / child_total * 100, 1)
+                            if child_total
+                            else 0
+                        ),
+                        "recent_grades": [
+                            {
+                                "assignment_title": submission.assignment.title,
+                                "grade": submission.grade,
+                                "numeric_score": submission.numeric_score,
+                            }
+                            for submission in recent_grades
+                        ],
+                    }
+                )
+                total += child_total
+                completed += child_completed
             data = {
                 "role": "parent",
-                "children": UserSerializer(children, many=True).data,
+                "children": children,
                 "total_assignments": total,
                 "completed_assignments": completed,
                 "completion_rate": round(completed / total * 100, 1) if total else 0,
@@ -532,6 +572,8 @@ class RoomMessagesView(ProtectedAPIView):
 
 
 class ProgressView(ProtectedAPIView):
+    permission_classes = [AuthenticatedOr401, IsStudentUser]
+
     def get(self, request):
         records = StudentProgress.objects.filter(student=request.user).select_related("material")
         scored = records.filter(score__isnull=False)
@@ -551,3 +593,23 @@ class ProgressView(ProtectedAPIView):
                 "total_study_time": records.aggregate(value=Sum("time_spent_minutes"))["value"] or 0,
             }
         )
+
+
+class ParentChildProgressView(ProtectedAPIView):
+    permission_classes = [AuthenticatedOr401, IsParentUser]
+
+    def get(self, request, student_id):
+        linked = ParentChildLink.objects.filter(
+           parent=request.user,
+           student_id=student_id,
+           is_active=True,
+        ).exists()
+        if not linked:
+           return Response(
+               {"detail": "Student not found."},
+               status=status.HTTP_404_NOT_FOUND,
+           )
+        records = StudentProgress.objects.filter(
+           student_id=student_id,
+        ).select_related("material")
+        return Response(ProgressSerializer(records, many=True).data)

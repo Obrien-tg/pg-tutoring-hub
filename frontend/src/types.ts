@@ -103,10 +103,26 @@ export interface TeacherDashboardPayload {
 
 export interface ParentDashboardPayload {
   role: "parent";
-  children: User[];
+  children: ParentDashboardChild[];
   total_assignments: number;
   completed_assignments: number;
   completion_rate: number;
+}
+
+export interface ParentDashboardGrade {
+  assignment_title: string;
+  grade: string;
+  numeric_score: number | null;
+}
+
+export interface ParentDashboardChild {
+  id: number;
+  student_name: string;
+  student_email: string;
+  total_assignments: number;
+  completed_assignments: number;
+  completion_rate: number;
+  recent_grades: ParentDashboardGrade[];
 }
 
 export type DashboardPayload =

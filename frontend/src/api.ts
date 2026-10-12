@@ -10,6 +10,8 @@ import {
   assignmentSchema,
   materialSchema,
   materialsListSchema,
+  progressRecordSchema,
+  progressSummarySchema,
   submissionSchema,
   userSchema,
 } from "./schemas";
@@ -20,6 +22,8 @@ import type {
   DashboardPayload,
   Material,
   MessagesList,
+  ProgressRecord,
+  ProgressSummary,
   RoomsList,
   Submission,
   User,
@@ -94,6 +98,24 @@ export class ApiClient {
 
   async getDashboard(): Promise<DashboardPayload> {
     return dashboardSchema.parse(await this.request("/api/dashboard/"));
+  }
+
+  async getParentDashboard(): Promise<Extract<DashboardPayload, { role: "parent" }>> {
+    const dashboard = await this.getDashboard();
+    if (dashboard.role !== "parent") {
+      throw new ApiError("Parent dashboard access is required.", 403);
+    }
+    return dashboard;
+  }
+
+  async getProgress(): Promise<ProgressSummary> {
+    return progressSummarySchema.parse(await this.request("/api/progress/"));
+  }
+
+  async getParentChildProgress(studentId: number): Promise<ProgressRecord[]> {
+    return z.array(progressRecordSchema).parse(
+      await this.request(`/api/parent/children/${studentId}/progress/`),
+    );
   }
 
   async getAssignments(): Promise<AssignmentDetail[]> {
