@@ -12,6 +12,7 @@ from .views import (
     MaterialDetailView,
     MaterialsView,
     MeView,
+    PasswordResetView,
     ProgressView,
     RoomMessagesView,
     RoomsView,
@@ -21,6 +22,7 @@ from .views import (
 urlpatterns = [
     path("csrf/", csrf_view, name="csrf"),
     path("auth/login/", LoginView.as_view(), name="login"),
+    path("auth/password/reset/", PasswordResetView.as_view(), name="password-reset"),
     path("auth/logout/", LogoutView.as_view(), name="logout"),
     path("auth/me/", MeView.as_view(), name="me"),
     path("dashboard/", DashboardView.as_view(), name="dashboard"),

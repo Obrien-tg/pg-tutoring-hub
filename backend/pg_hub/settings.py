@@ -233,6 +233,9 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
     ],
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": "5/min",
+    },
 }
 
 # Channels configuration for real-time chat
@@ -273,8 +276,20 @@ MEDIA_ROOT = BASE_DIR / "media"
 # Templates directory
 TEMPLATES[0]["DIRS"] = [BASE_DIR / "templates"]
 
-# Email configuration (for development)
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+# Email configuration: use Resend SMTP only when credentials are configured.
+EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
+DEFAULT_FROM_EMAIL = config(
+    "DEFAULT_FROM_EMAIL",
+    default="Patience Gwanyanya <onboarding@resend.dev>",
+)
+if EMAIL_HOST_PASSWORD:
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+    EMAIL_HOST = config("EMAIL_HOST", default="smtp.resend.com")
+    EMAIL_PORT = config("EMAIL_PORT", default=587, cast=int)
+    EMAIL_USE_TLS = config("EMAIL_USE_TLS", default=True, cast=bool)
+    EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="resend")
+else:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 # Login/Logout URLs
 LOGIN_URL = "/users/login/"

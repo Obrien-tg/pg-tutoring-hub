@@ -29,10 +29,12 @@ ENV/
 *.log
 local_settings.py
 db.sqlite3
+*.sqlite3
 db.sqlite3-journal
 /staticfiles/
 
 # Media files (keep structure but ignore uploads)
+/backend/media/
 /media/uploads/*
 /media/materials/*
 /media/profile_pics/*

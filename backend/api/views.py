@@ -1,4 +1,5 @@
 from django.contrib.auth import authenticate, get_user_model, login, logout
+from django.contrib.auth.forms import PasswordResetForm
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Avg, Count, Max, Prefetch, Sum
@@ -9,6 +10,7 @@ from django.utils import timezone
 from rest_framework import permissions, status
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.throttling import AnonRateThrottle
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -75,6 +77,32 @@ class LoginView(APIView):
             )
         login(request, user)
         return Response({"user": UserSerializer(user).data})
+
+
+class PasswordResetView(APIView):
+    permission_classes = [permissions.AllowAny]
+    throttle_classes = [AnonRateThrottle]
+
+    def post(self, request):
+        email = str(request.data.get("email", "")).strip()
+        if email:
+            # NOTE: Django default reset email contains a backend template link.
+            # SPA "Forgot Password" UI and custom email templates are a non-goal for P1.
+            form = PasswordResetForm({"email": email})
+            if form.is_valid():
+                form.save(
+                    use_https=request.is_secure(),
+                    request=request,
+                    from_email=None,
+                )
+        return Response(
+            {
+                "detail": (
+                    "If an account with this email exists, a password reset link "
+                    "has been sent."
+                )
+            }
+        )
 
 
 class LogoutView(ProtectedAPIView):
