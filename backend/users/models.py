@@ -1,9 +1,11 @@
 import os
 
 from django.contrib.auth.models import AbstractUser
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import FileExtensionValidator, RegexValidator
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 
 def validate_image_size(image):
@@ -58,6 +60,7 @@ class CustomUser(AbstractUser):
     )
 
     # Student-specific fields
+    email = models.EmailField(_("email address"), unique=True, null=True, blank=True)
     grade_level = models.CharField(max_length=20, blank=True)
     parent_email = models.EmailField(blank=True)
 
@@ -100,6 +103,8 @@ class CustomUser(AbstractUser):
                 )
 
     def save(self, *args, **kwargs):
+        if self.email == "":
+            self.email = None
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -120,6 +125,58 @@ class CustomUser(AbstractUser):
     @property
     def full_name(self):
         return f"{self.first_name} {self.last_name}".strip() or self.username
+
+
+class ParentChildLink(models.Model):
+    parent = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="parent_links",
+    )
+    student = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="child_links",
+    )
+    is_active = models.BooleanField(
+        default=True,
+        help_text="Soft disable link without losing history",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["parent", "student"],
+                name="unique_parent_student_link",
+            )
+        ]
+        verbose_name = "Parent-Child Link"
+        verbose_name_plural = "Parent-Child Links"
+        ordering = ["-created_at"]
+
+    def clean(self):
+        super().clean()
+        errors = {}
+        if self.parent_id and not self.parent.is_parent:
+            errors["parent"] = "Parent must have the parent role."
+        if self.student_id and not self.student.is_student:
+            errors["student"] = "Student must have the student role."
+        if self.parent_id and self.student_id and self.parent_id == self.student_id:
+            errors["student"] = "Parent and student must be different users."
+        if errors:
+            raise ValidationError(errors)
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return (
+            f"{self.parent.email or self.parent.username} -> "
+            f"{self.student.email or self.student.username}"
+        )
 
 
 class FirebaseToken(models.Model):

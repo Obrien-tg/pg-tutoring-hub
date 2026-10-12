@@ -19,6 +19,7 @@ from chat.models import ChatRoom, Message
 from hub.models import Assignment, AssignmentSubmission, Material, StudentProgress
 from users.firebase_utils import send_submission_notification
 from users import firebase_utils
+from users.models import ParentChildLink
 
 from dashboard.services import build_student_dashboard
 
@@ -28,10 +29,12 @@ from .serializers import (
     AssignmentSubmissionSerializer,
     MaterialSerializer,
     MessageSerializer,
+    ParentChildListSerializer,
     ProgressSerializer,
     RoomSerializer,
     UserSerializer,
 )
+from .permissions import IsParentUser
 
 User = get_user_model()
 
@@ -103,6 +106,17 @@ class PasswordResetView(APIView):
                 )
             }
         )
+
+
+class ParentChildrenListView(ProtectedAPIView):
+    permission_classes = [AuthenticatedOr401, IsParentUser]
+
+    def get(self, request):
+        links = (
+            ParentChildLink.objects.filter(parent=request.user, is_active=True)
+            .select_related("student")
+        )
+        return Response(ParentChildListSerializer(links, many=True).data)
 
 
 class LogoutView(ProtectedAPIView):

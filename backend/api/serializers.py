@@ -7,6 +7,7 @@ from hub.models import (
     Material,
     StudentProgress,
 )
+from users.models import ParentChildLink
 
 
 class UserSerializer(serializers.Serializer):
@@ -17,6 +18,15 @@ class UserSerializer(serializers.Serializer):
     last_name = serializers.CharField(read_only=True)
     user_type = serializers.CharField(read_only=True)
     full_name = serializers.CharField(read_only=True)
+
+
+class ParentChildListSerializer(serializers.ModelSerializer):
+    student_name = serializers.CharField(source="student.get_full_name", read_only=True)
+    student_email = serializers.EmailField(source="student.email", read_only=True)
+
+    class Meta:
+        model = ParentChildLink
+        fields = ("id", "student", "student_name", "student_email", "is_active")
 
 
 class MaterialSerializer(serializers.ModelSerializer):
