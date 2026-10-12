@@ -280,10 +280,6 @@ class AssignmentSubmissionApiTests(TestCase):
         )
 
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(
-            response.json()["detail"],
-            "Submission files must be 10 MB or smaller.",
-        )
         self.assertFalse(AssignmentSubmission.objects.exists())
 
     def test_submission_file_over_10mb_is_rejected(self):
@@ -301,6 +297,10 @@ class AssignmentSubmissionApiTests(TestCase):
         )
 
         self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            response.json()["detail"],
+            "Submission files must be 10 MB or smaller.",
+        )
         self.assertFalse(AssignmentSubmission.objects.exists())
 
     def test_assignment_detail_includes_student_submission(self):
